@@ -55,4 +55,12 @@ The platform offers:
 ---
 
 ## Struktur Proyek / Project Structure
-
+crypto-prediction-bot/
+├── frontend/ # Website / Dashboard
+├── backend/ # API & prediction logic
+├── bot/ # Automated trading bot
+├── docs/ # Documentation
+├── scripts/ # Deployment / migration / utility scripts
+├── .gitignore # Git ignore file
+├── LICENSE # Internal / commercial license
+└── README.md
