@@ -1,36 +1,21 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
-export default function CandlestickChart({ symbol = "BTCUSDT" }) {
-  const chartContainerRef = useRef(null);
-  const chartRef = useRef(null);
-  const candleSeriesRef = useRef(null);
+export default function CandlestickChart({ data }) {
+  const chartContainerRef = useRef();
 
   useEffect(() => {
-    if (!chartContainerRef.current) {
-      console.error("❌ Chart container not found");
-      return;
-    }
+    if (!data || data.length === 0) return;
 
-    console.log("✅ Chart container ready:", chartContainerRef.current);
-
-    // Buat chart
-    chartRef.current = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth || 600,
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
       height: 400,
-      layout: {
-        background: { color: "#ffffff" },
-        textColor: "#000",
-      },
-      grid: {
-        vertLines: { color: "#eee" },
-        horzLines: { color: "#eee" },
-      },
+      layout: { background: { color: "#fff" }, textColor: "#333" },
+      grid: { vertLines: { color: "#eee" }, horzLines: { color: "#eee" } },
     });
 
-    // Tambah candlestick series
-    candleSeriesRef.current = chartRef.current.addCandlestickSeries({
+    const candleSeries = chart.addCandlestickSeries({
       upColor: "#4caf50",
       borderUpColor: "#4caf50",
       wickUpColor: "#4caf50",
@@ -39,57 +24,17 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
       wickDownColor: "#f44336",
     });
 
-    // Ambil data candle
-    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=200`;
-    console.log("🔗 Fetching:", url);
+    candleSeries.setData(data);
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("📊 Raw Binance data:", data.slice(0, 5)); // tampilkan 5 candle pertama
-        if (!Array.isArray(data)) {
-          console.error("❌ Binance response invalid:", data);
-          return;
-        }
-
-        const formatted = data.map((d) => ({
-          time: d[0] / 1000,
-          open: parseFloat(d[1]),
-          high: parseFloat(d[2]),
-          low: parseFloat(d[3]),
-          close: parseFloat(d[4]),
-        }));
-
-        console.log("✅ Formatted candlestick data:", formatted.slice(0, 5));
-        candleSeriesRef.current.setData(formatted);
-      })
-      .catch((err) => console.error("❌ Error fetching Binance data:", err));
-
-    // Resize otomatis
-    const handleResize = () => {
-      chartRef.current.applyOptions({
-        width: chartContainerRef.current.clientWidth,
-      });
-    };
+    const handleResize = () =>
+      chart.applyOptions({ width: chartContainerRef.current.clientWidth });
     window.addEventListener("resize", handleResize);
 
     return () => {
+      chart.remove();
       window.removeEventListener("resize", handleResize);
-      if (chartRef.current) {
-        chartRef.current.remove();
-      }
     };
-  }, [symbol]);
+  }, [data]);
 
-  return (
-    <div
-      ref={chartContainerRef}
-      style={{
-        width: "100%",
-        height: "400px",
-        minHeight: "400px",
-        border: "1px solid #ccc",
-      }}
-    />
-  );
+  return <div ref={chartContainerRef} style={{ width: "100%", height: "400px" }} />;
 }
