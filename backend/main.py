@@ -4,7 +4,7 @@ import requests
 
 app = FastAPI()
 
-# CORS supaya frontend bisa fetch
+# Izinkan CORS supaya frontend bisa fetch
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -12,16 +12,16 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Summary semua pair
+# Ambil summary semua pair dari Indodax public API
 @app.get("/indodax-summaries")
 def get_summaries():
     url = "https://indodax.com/api/summaries"
-    res = requests.get(url)
-    return res.json() if res.status_code == 200 else {"error": res.status_code}
+    resp = requests.get(url)
+    return resp.json()  # langsung kirim JSON ke frontend
 
-# Order book untuk pair tertentu
+# Ambil order book untuk pair tertentu
 @app.get("/indodax-orderbook/{pair}")
 def get_orderbook(pair: str):
-    url = f"https://indodax.com/api/orderbook/{pair}"
-    res = requests.get(url)
-    return res.json() if res.status_code == 200 else {"error": res.status_code}
+    url = f"https://indodax.com/api/{pair}/depth"
+    resp = requests.get(url)
+    return resp.json()
