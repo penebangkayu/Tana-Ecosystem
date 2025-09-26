@@ -1,33 +1,51 @@
 "use client";
 import { useEffect, useState } from "react";
+import CandlestickChart from "../components/candlestickchart";
 
 export default function Home() {
-  const [selectedPair, setSelectedPair] = useState(""); // awalnya kosong
+  const [selectedPair, setSelectedPair] = useState("");
   const [ticker, setTicker] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [candleData, setCandleData] = useState([]);
 
-  // Fetch ticker saat user pilih pair
+  const popularPairs = ["btc_idr", "xrp_idr", "eth_idr"];
+
   useEffect(() => {
-    if (!selectedPair) return; // jika belum pilih, jangan fetch
+    if (!selectedPair) return;
+
     setLoading(true);
     async function fetchTicker() {
       try {
         const res = await fetch(`https://indodax.com/api/${selectedPair}/ticker`);
         const data = await res.json();
         setTicker(data.ticker);
+
+        // dummy candlestick data
+        const dummyCandles = [];
+        let price = parseFloat(data.ticker.last);
+        for (let i = 0; i < 30; i++) {
+          const open = price - Math.random() * 1000;
+          const close = price + Math.random() * 1000;
+          const high = Math.max(open, close) + Math.random() * 500;
+          const low = Math.min(open, close) - Math.random() * 500;
+          dummyCandles.push({
+            time: Math.floor(Date.now() / 1000) - (30 - i) * 86400,
+            open,
+            high,
+            low,
+            close,
+          });
+        }
+        setCandleData(dummyCandles);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
+
     fetchTicker();
   }, [selectedPair]);
-
-  const handleSelect = (pair) => {
-    setSelectedPair(pair);
-    setTicker(null);
-  };
 
   return (
     <div style={{ fontFamily: "Inter, sans-serif", padding: "20px" }}>
@@ -36,18 +54,20 @@ export default function Home() {
 
       <div style={{ margin: "20px 0" }}>
         <label>Pilih Ticker: </label>
-        <select value={selectedPair} onChange={(e) => handleSelect(e.target.value)}>
+        <select value={selectedPair} onChange={(e) => setSelectedPair(e.target.value)}>
           <option value="">-- Pilih Pair --</option>
-          <option value="btc_idr">BTC/IDR</option>
-          <option value="xrp_idr">XRP/IDR</option>
-          <option value="eth_idr">ETH/IDR</option>
+          {popularPairs.map((pair) => (
+            <option key={pair} value={pair}>
+              {pair.toUpperCase()}
+            </option>
+          ))}
         </select>
       </div>
 
       {loading && <p>Memuat data ticker...</p>}
 
       {ticker && (
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
           <div
             style={{
               flex: 1,
@@ -66,6 +86,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {candleData.length > 0 && <CandlestickChart data={candleData} />}
     </div>
   );
 }
