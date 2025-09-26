@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
-export default function CandlestickChart({ data }) {
+export default function CandlestickChart({ pair }) {
   const chartContainerRef = useRef();
 
   useEffect(() => {
@@ -10,15 +10,11 @@ export default function CandlestickChart({ data }) {
       height: 400,
       layout: {
         background: { color: "#ffffff" },
-        textColor: "#333",
+        textColor: "#000",
       },
       grid: {
         vertLines: { color: "#eee" },
         horzLines: { color: "#eee" },
-      },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
       },
     });
 
@@ -31,19 +27,28 @@ export default function CandlestickChart({ data }) {
       wickDownColor: "#f44336",
     });
 
-    candleSeries.setData(data);
+    async function fetchCandles() {
+      const res = await fetch(
+        `https://indodax.com/tradingview/history?symbol=${pair}&resolution=60&from=${Math.floor(Date.now()/1000 - 86400)}&to=${Math.floor(Date.now()/1000)}`
+      );
+      const data = await res.json();
 
-    const handleResize = () => {
-      chart.applyOptions({ width: chartContainerRef.current.clientWidth });
-    };
+      if (data && data.t) {
+        const candles = data.t.map((t, i) => ({
+          time: t,
+          open: data.o[i],
+          high: data.h[i],
+          low: data.l[i],
+          close: data.c[i],
+        }));
+        candleSeries.setData(candles);
+      }
+    }
 
-    window.addEventListener("resize", handleResize);
+    fetchCandles();
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      chart.remove();
-    };
-  }, [data]);
+    return () => chart.remove();
+  }, [pair]);
 
-  return <div ref={chartContainerRef} style={{ width: "100%", height: "400px" }} />;
+  return <div ref={chartContainerRef} style={{ width: "100%", height: "100%" }} />;
 }
