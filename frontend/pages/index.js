@@ -2,19 +2,32 @@
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [markets, setMarkets] = useState([]);
-  const [selectedPair, setSelectedPair] = useState("btc_idr");
+  const [selectedPair, setSelectedPair] = useState(""); // awalnya kosong
+  const [ticker, setTicker] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch ticker saat user pilih pair
   useEffect(() => {
-    async function fetchMarkets() {
-      const res = await fetch("https://indodax.com/api/summaries");
-      const data = await res.json();
-      setMarkets(data);
+    if (!selectedPair) return; // jika belum pilih, jangan fetch
+    setLoading(true);
+    async function fetchTicker() {
+      try {
+        const res = await fetch(`https://indodax.com/api/${selectedPair}/ticker`);
+        const data = await res.json();
+        setTicker(data.ticker);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchMarkets();
-  }, []);
+    fetchTicker();
+  }, [selectedPair]);
 
-  const marketData = markets.find((market) => market.pair === selectedPair);
+  const handleSelect = (pair) => {
+    setSelectedPair(pair);
+    setTicker(null);
+  };
 
   return (
     <div style={{ fontFamily: "Inter, sans-serif", padding: "20px" }}>
@@ -22,28 +35,36 @@ export default function Home() {
       <p>Website Prediksi Pasar Crypto & Bot Trading</p>
 
       <div style={{ margin: "20px 0" }}>
-        <label>Pilih Pair: </label>
-        <select value={selectedPair} onChange={(e) => setSelectedPair(e.target.value)}>
-          {markets.map((market) => (
-            <option key={market.pair} value={market.pair}>
-              {market.pair.toUpperCase()}
-            </option>
-          ))}
+        <label>Pilih Ticker: </label>
+        <select value={selectedPair} onChange={(e) => handleSelect(e.target.value)}>
+          <option value="">-- Pilih Pair --</option>
+          <option value="btc_idr">BTC/IDR</option>
+          <option value="xrp_idr">XRP/IDR</option>
+          <option value="eth_idr">ETH/IDR</option>
         </select>
       </div>
 
-      {marketData ? (
+      {loading && <p>Memuat data ticker...</p>}
+
+      {ticker && (
         <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: "300px", background: "#fff", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-            <h2>TICKERS</h2>
-            <p>Last: {marketData.last}</p>
-            <p>High: {marketData.high}</p>
-            <p>Low: {marketData.low}</p>
-            <p>Volume: {marketData.vol}</p>
+          <div
+            style={{
+              flex: 1,
+              minWidth: "300px",
+              background: "#fff",
+              padding: "16px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+            }}
+          >
+            <h2>TICKER {selectedPair.toUpperCase()}</h2>
+            <p>Last: {ticker.last}</p>
+            <p>High: {ticker.high}</p>
+            <p>Low: {ticker.low}</p>
+            <p>Volume: {ticker.vol}</p>
           </div>
         </div>
-      ) : (
-        <p>Memuat data...</p>
       )}
     </div>
   );
