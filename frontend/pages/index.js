@@ -1,3 +1,4 @@
+// pages/index.js
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -6,86 +7,54 @@ const CandlestickChart = dynamic(() => import("../components/candlestickchart"),
 });
 
 export default function Home() {
-  const [summaries, setSummaries] = useState({});
+  const [pair, setPair] = useState("btc_idr");
   const [orderbook, setOrderbook] = useState(null);
-  const [selectedPair, setSelectedPair] = useState("btc_idr");
 
-  // URL backend kamu (ubah ke URL Render/Railway kalau sudah deploy backend)
-  const API_BASE = "https://tana-backend.onrender.com";
-
-  // ambil summaries
   useEffect(() => {
-    async function fetchSummaries() {
-      const res = await fetch(`${API_BASE}/summaries`);
-      const data = await res.json();
-      setSummaries(data.tickers || {});
-    }
-    fetchSummaries();
-  }, []);
-
-  // ambil orderbook sesuai pair
-  useEffect(() => {
-    async function fetchOrderbook() {
-      if (!selectedPair) return;
-      const res = await fetch(`${API_BASE}/orderbook/${selectedPair}`);
-      const data = await res.json();
-      setOrderbook(data);
-    }
-    fetchOrderbook();
-  }, [selectedPair]);
+    // Ambil Orderbook langsung dari Indodax API
+    fetch(`https://indodax.com/api/order_book/${pair}`)
+      .then((res) => res.json())
+      .then((data) => setOrderbook(data));
+  }, [pair]);
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Tana Ecosystem</h1>
-      <p>Website Prediksi Pasar Crypto & Bot Trading</p>
+      <h2>Website Prediksi Pasar Crypto & Bot Trading</h2>
 
-      {/* pilih pair */}
-      <div>
-        <label>Pilih Pair: </label>
-        <select
-          value={selectedPair}
-          onChange={(e) => setSelectedPair(e.target.value)}
-        >
-          {Object.keys(summaries).map((pair) => (
-            <option key={pair} value={pair}>
-              {pair.toUpperCase()}
-            </option>
-          ))}
-        </select>
-      </div>
+      <label>Pilih Pair: </label>
+      <select value={pair} onChange={(e) => setPair(e.target.value)}>
+        <option value="btc_idr">BTC/IDR</option>
+        <option value="eth_idr">ETH/IDR</option>
+        <option value="xrp_idr">XRP/IDR</option>
+      </select>
 
-      {/* grafik */}
-      <div style={{ height: "500px", marginTop: "20px" }}>
-        <h2>Grafik Harga {selectedPair.toUpperCase()} (Candlestick)</h2>
-        <CandlestickChart pair={selectedPair} />
-      </div>
+      <h3>Grafik Harga {pair.toUpperCase()} (Candlestick)</h3>
+      <CandlestickChart pair={pair} />
 
-      {/* orderbook */}
-      <div style={{ marginTop: "20px" }}>
-        <h2>Order Book {selectedPair.toUpperCase()}</h2>
-        {orderbook ? (
-          <div style={{ display: "flex", gap: "40px" }}>
+      {orderbook && (
+        <>
+          <h3>Order Book</h3>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
-              <h3>Bids</h3>
+              <h4>Bids</h4>
               <ul>
-                {orderbook.buy.slice(0, 10).map((bid, idx) => (
-                  <li key={idx}>{bid.join(" | ")}</li>
+                {orderbook.buy.slice(0, 5).map((bid, i) => (
+                  <li key={i}>{bid[0]} IDR — {bid[1]} {pair.split("_")[0]}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3>Asks</h3>
+              <h4>Asks</h4>
               <ul>
-                {orderbook.sell.slice(0, 10).map((ask, idx) => (
-                  <li key={idx}>{ask.join(" | ")}</li>
+                {orderbook.sell.slice(0, 5).map((ask, i) => (
+                  <li key={i}>{ask[0]} IDR — {ask[1]} {pair.split("_")[0]}</li>
                 ))}
               </ul>
             </div>
           </div>
-        ) : (
-          <p>Loading orderbook...</p>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
