@@ -2,15 +2,17 @@ import { useEffect, useRef } from "react";
 import { createChart } from "lightweight-charts";
 
 export default function CandlestickChart({ pair }) {
-  const chartContainerRef = useRef();
+  const chartContainerRef = useRef(null);
 
   useEffect(() => {
+    if (!chartContainerRef.current) return;
+
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: 400,
       layout: {
-        background: { color: "#ffffff" },
         textColor: "#000",
+        background: { type: "solid", color: "#fff" },
       },
       grid: {
         vertLines: { color: "#eee" },
@@ -27,28 +29,31 @@ export default function CandlestickChart({ pair }) {
       wickDownColor: "#f44336",
     });
 
-    async function fetchCandles() {
-      const res = await fetch(
-        `https://indodax.com/tradingview/history?symbol=${pair}&resolution=60&from=${Math.floor(Date.now()/1000 - 86400)}&to=${Math.floor(Date.now()/1000)}`
-      );
-      const data = await res.json();
+    async function fetchData() {
+      try {
+        const res = await fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=1h&limit=50`
+        );
+        const data = await res.json();
 
-      if (data && data.t) {
-        const candles = data.t.map((t, i) => ({
-          time: t,
-          open: data.o[i],
-          high: data.h[i],
-          low: data.l[i],
-          close: data.c[i],
+        const formatted = data.map((d) => ({
+          time: d[0] / 1000, // Binance kasih timestamp ms → convert ke detik
+          open: parseFloat(d[1]),
+          high: parseFloat(d[2]),
+          low: parseFloat(d[3]),
+          close: parseFloat(d[4]),
         }));
-        candleSeries.setData(candles);
+
+        candleSeries.setData(formatted);
+      } catch (err) {
+        console.error("Gagal ambil data Binance:", err);
       }
     }
 
-    fetchCandles();
+    fetchData();
 
     return () => chart.remove();
   }, [pair]);
 
-  return <div ref={chartContainerRef} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={chartContainerRef} style={{ width: "100%", height: "400px" }} />;
 }
