@@ -1,17 +1,18 @@
-export default function CryptoCard({ name, price, prediction }) {
+export default function CryptoCard({ name, price, prediction, isSelected }) {
   return (
     <div style={{
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      padding: "15px",
-      margin: "10px",
-      width: "200px",
-      backgroundColor: "white",
-      boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
+      border: isSelected ? "2px solid #4caf50" : "1px solid #ccc",
+      borderRadius: "10px",
+      padding: "10px 15px",
+      margin: "5px",
+      minWidth: "120px",
+      textAlign: "center",
+      backgroundColor: isSelected ? "#f0fff0" : "#fff",
+      transition: "0.2s"
     }}>
-      <h2>{name}</h2>
-      <p>Price: {price}</p>
-      <p>Prediction: {prediction}</p>
+      <h4>{name}</h4>
+      <p>{price}</p>
+      <small>{prediction}</small>
     </div>
-  )
+  );
 }
