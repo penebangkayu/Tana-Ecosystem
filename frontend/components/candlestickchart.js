@@ -8,11 +8,16 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
   const candleSeriesRef = useRef(null);
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    if (!chartContainerRef.current) {
+      console.error("❌ Chart container not found");
+      return;
+    }
 
-    // ✅ Buat chart baru
+    console.log("✅ Chart container ready:", chartContainerRef.current);
+
+    // Buat chart
     chartRef.current = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
+      width: chartContainerRef.current.clientWidth || 600,
       height: 400,
       layout: {
         background: { color: "#ffffff" },
@@ -24,7 +29,7 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
       },
     });
 
-    // ✅ Tambah candlestick series
+    // Tambah candlestick series
     candleSeriesRef.current = chartRef.current.addCandlestickSeries({
       upColor: "#4caf50",
       borderUpColor: "#4caf50",
@@ -34,12 +39,19 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
       wickDownColor: "#f44336",
     });
 
-    // ✅ Ambil data awal (200 candle terakhir dari Binance)
-    fetch(
-      `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=200`
-    )
+    // Ambil data candle
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=200`;
+    console.log("🔗 Fetching:", url);
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
+        console.log("📊 Raw Binance data:", data.slice(0, 5)); // tampilkan 5 candle pertama
+        if (!Array.isArray(data)) {
+          console.error("❌ Binance response invalid:", data);
+          return;
+        }
+
         const formatted = data.map((d) => ({
           time: d[0] / 1000,
           open: parseFloat(d[1]),
@@ -47,12 +59,13 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
           low: parseFloat(d[3]),
           close: parseFloat(d[4]),
         }));
-        console.log("Candlestick data:", formatted); // ✅ Debug
+
+        console.log("✅ Formatted candlestick data:", formatted.slice(0, 5));
         candleSeriesRef.current.setData(formatted);
       })
-      .catch((err) => console.error("Error fetch Binance data:", err));
+      .catch((err) => console.error("❌ Error fetching Binance data:", err));
 
-    // ✅ Resize otomatis
+    // Resize otomatis
     const handleResize = () => {
       chartRef.current.applyOptions({
         width: chartContainerRef.current.clientWidth,
@@ -71,7 +84,12 @@ export default function CandlestickChart({ symbol = "BTCUSDT" }) {
   return (
     <div
       ref={chartContainerRef}
-      style={{ width: "100%", height: "400px", minHeight: "400px" }}
+      style={{
+        width: "100%",
+        height: "400px",
+        minHeight: "400px",
+        border: "1px solid #ccc",
+      }}
     />
   );
 }
