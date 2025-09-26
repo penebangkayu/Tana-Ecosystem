@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import CandlestickChart from "../components/CandlestickChart";
+import CandlestickChart from "../components/candlestickchart";
 
 export default function Home() {
   const [summaries, setSummaries] = useState({});
