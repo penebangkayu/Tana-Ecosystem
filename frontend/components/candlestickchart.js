@@ -11,8 +11,10 @@ export default function CandlestickChart({ data }) {
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: 400,
-      layout: { background: { color: "#fff" }, textColor: "#333" },
+      layout: { backgroundColor: "#fff", textColor: "#333" }, // perbaikan utama
       grid: { vertLines: { color: "#eee" }, horzLines: { color: "#eee" } },
+      rightPriceScale: { borderColor: "#ccc" },
+      timeScale: { borderColor: "#ccc", timeVisible: true, secondsVisible: false },
     });
 
     const candleSeries = chart.addCandlestickSeries({
