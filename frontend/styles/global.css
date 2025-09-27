@@ -1,5 +1,6 @@
 body {
-  font-family: 'Inter', sans-serif;
+  /* Ganti font ke font sistem mirip "The Seasons" */
+  font-family: "Brush Script MT", "Lucida Handwriting", cursive, sans-serif;
   background: #f7f9fa;
   margin: 0;
   padding: 0;
