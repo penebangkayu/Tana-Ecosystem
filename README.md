@@ -1,53 +1,80 @@
-# Tana Ecosystem
+# Tana-Ecosystem
 
-**Tana Ecosystem – Ekosistem pintar untuk prediksi crypto dan trading otomatis berbayar / Smart ecosystem for paid crypto predictions & automated trading**
+Selamat datang di **Tana-Ecosystem**!  
+Welcome to **Tana-Ecosystem**!
 
 ---
 
-## 🇮🇩 Deskripsi
+## 🇮🇩 Bahasa Indonesia
 
-**Tana Ecosystem** adalah platform terpadu untuk prediksi pasar cryptocurrency dan bot trading berbayar. Dirancang untuk memberikan pengalaman yang aman, intuitif, dan efisien bagi trader pemula maupun profesional.
+### Ringkasan
 
-Platform ini menawarkan:
-- Dashboard interaktif untuk analisis pasar real-time
-- Strategi trading otomatis yang dapat dikustomisasi
-- Akses premium untuk prediksi eksklusif
-- Keamanan tinggi untuk API key dan kredensial pengguna
+**Tana-Ecosystem** adalah ekosistem terbuka untuk membangun aplikasi digital yang modular, fleksibel, dan mudah diintegrasikan. Proyek ini berfokus pada pengembangan solusi di bidang kripto dan perdagangan digital, termasuk mesin trading otomatis, manajemen aset kripto, integrasi dengan berbagai platform blockchain, serta prediksi pasar berbasis kecerdasan buatan (AI). Cocok untuk riset, pengembangan solusi, hingga implementasi nyata—memberikan fondasi teknologi yang dapat dikembangkan sesuai kebutuhan Anda.
 
 ### Fitur Utama
-- **Prediksi Pasar Real-time**: Analisis harga, tren, dan prediksi berbasis data historis dan analisis teknikal.  
-- **Bot Trading Otomatis**: Mendukung strategi trading custom dan eksekusi otomatis di berbagai exchange.  
-- **Layanan Berbayar / Subscription**: Fitur premium untuk strategi lanjutan dan prediksi eksklusif.  
-- **Keamanan & Privasi**: Semua kredensial disimpan di environment variables dan mengikuti praktik keamanan terbaik.
 
-### Teknologi
-- Frontend: React / Next.js  
-- Backend: Python (FastAPI / Flask)  
-- Bot Trading: Python, modul trading API  
-- Database: PostgreSQL / SQLite  
-- Lainnya: Docker, CI/CD (GitHub Actions)
+- Modular dan mudah dikembangkan
+- Mesin trading otomatis untuk ekosistem kripto dan perdagangan digital
+- Prediksi pasar menggunakan kecerdasan buatan (AI Market Prediction)
+- Mendukung integrasi dengan berbagai platform dan layanan, khususnya blockchain dan ekosistem kripto
+- Dokumentasi dan contoh penggunaan yang lengkap
+- Terbuka untuk kontribusi dari komunitas
+
+### Cara Memulai
+
+1. Clone repositori ini:
+   ```bash
+   git clone https://github.com/penebangkayu/Tana-Ecosystem.git
+   ```
+2. Ikuti instruksi instalasi pada dokumentasi masing-masing modul.
+3. Mulai berkontribusi dengan membuat pull request!
+
+### Kontribusi
+
+Kontribusi sangat terbuka untuk siapa saja. Silakan buka [issue](https://github.com/penebangkayu/Tana-Ecosystem/issues) atau [pull request](https://github.com/penebangkayu/Tana-Ecosystem/pulls) untuk perbaikan, penambahan fitur, atau diskusi.
+
+### Lisensi
+
+Proyek ini menggunakan lisensi MIT—bebas digunakan, dikembangkan, dan didistribusikan.
 
 ---
 
-## 🇬🇧 Description
+## 🇬🇧 English
 
-**Tana Ecosystem** is an integrated platform for crypto market prediction and a paid automated trading bot. It is designed to provide a safe, intuitive, and efficient experience for both beginner and professional traders.
+### Overview
 
-The platform offers:
-- Interactive dashboard for real-time market analysis
-- Customizable automated trading strategies
-- Premium access to exclusive predictions
-- High security for API keys and user credentials
+**Tana-Ecosystem** is an open ecosystem for building modular, flexible, and easily integrated digital applications. This project focuses on developing solutions in the field of crypto and digital trading, including automatic trading engines, crypto asset management, integration with various blockchain platforms, and market prediction powered by artificial intelligence (AI). Suitable for research, solution development, and real-world deployment—providing a technology foundation that you can expand as needed.
 
-### Key Features
-- **Real-time Market Prediction**: Analyzes prices, trends, and predictions based on historical data and technical analysis.  
-- **Automated Trading Bot**: Supports custom trading strategies and automatic execution across multiple exchanges.  
-- **Paid Subscription**: Premium features for advanced strategies and exclusive predictions.  
-- **Security & Privacy**: All credentials are stored in environment variables; best security practices applied.
+### Main Features
 
-### Technology Stack
-- Frontend: React / Next.js  
-- Backend: Python (FastAPI / Flask)  
-- Trading Bot: Python, trading API modules  
-- Database: PostgreSQL / SQLite  
-- Others: Docker, CI/CD (GitHub Actions)
+- Modular and easily extensible
+- Automatic trading engine for crypto and digital trading ecosystems
+- Market prediction using artificial intelligence (AI Market Prediction)
+- Supports integration with various platforms and services, especially blockchain and crypto ecosystems
+- Complete documentation and usage examples
+- Open for contributions from the community
+
+### Getting Started
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/penebangkayu/Tana-Ecosystem.git
+   ```
+2. Follow the installation instructions in each module’s documentation.
+3. Start contributing by submitting pull requests!
+
+### Contribution
+
+We welcome contributions from anyone. Open an [issue](https://github.com/penebangkayu/Tana-Ecosystem/issues) or [pull request](https://github.com/penebangkayu/Tana-Ecosystem/pulls) for improvements, new features, or discussion.
+
+### License
+
+This project uses the MIT license—free to use, develop, and distribute.
+
+---
+
+## Kontak / Contact
+
+Untuk pertanyaan, ide, atau kerjasama, silakan hubungi melalui [GitHub Issues](https://github.com/penebangkayu/Tana-Ecosystem/issues).
+
+For questions, suggestions, or collaboration, please contact via [GitHub Issues](https://github.com/penebangkayu/Tana-Ecosystem/issues).
