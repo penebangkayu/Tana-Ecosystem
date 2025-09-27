@@ -2,41 +2,65 @@
 import { useState, useEffect, useRef } from "react";
 import CandlestickChart from "../components/candlestickchart";
 
-// Dummy data market crypto untuk body list market
-const marketList = [
-  { symbol: "BTC/IDR", last: "900,000,000", vol: "200" },
-  { symbol: "ETH/IDR", last: "55,000,000", vol: "150" },
-  { symbol: "XRP/IDR", last: "8,000", vol: "5000" },
-];
-
 export default function Home() {
+  const [markets, setMarkets] = useState([]);
   const [selectedPair, setSelectedPair] = useState("");
   const [ticker, setTicker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [candleData, setCandleData] = useState([]);
   const intervalRef = useRef();
-  const [markets, setMarkets] = useState(marketList);
 
-  const popularPairs = ["btc_idr", "xrp_idr", "eth_idr"];
+  // Ambil list coin dari Indodax
+  useEffect(() => {
+    async function fetchMarkets() {
+      try {
+        const res = await fetch("https://indodax.com/api/pairs");
+        const data = await res.json();
+        // Filter hanya pair dengan IDR dan tampilkan 10 market teratas
+        const idrMarkets = data.filter((m) => m.pair.endsWith("_idr")).slice(0, 10);
+        setMarkets(idrMarkets);
+      } catch (err) {
+        console.error("Failed fetching markets:", err);
+      }
+    }
+    fetchMarkets();
+  }, []);
 
-  // Fetch ticker dan dummy candle untuk chart
+  // Ambil data chart & ticker dari Indodax API
   async function fetchTickerAndCandle(pair) {
     setLoading(true);
     try {
+      // Ticker
       const res = await fetch(`https://indodax.com/api/${pair}/ticker`);
-      const data = await res.json();
-      setTicker(data.ticker);
+      const tickerData = await res.json();
+      setTicker(tickerData.ticker);
 
-      // Dummy candlestick data, format harus sesuai lightweight-charts
+      // Candlestick (ambil dari trades, simulasi OHLC)
+      const tradesRes = await fetch(`https://indodax.com/api/${pair}/trades`);
+      const trades = await tradesRes.json();
+
+      // Simulasi candle: 30 candle harian dari trades
       const dummyCandles = [];
-      let price = parseFloat(data.ticker.last);
+      const now = Math.floor(Date.now() / 1000);
       for (let i = 0; i < 30; i++) {
-        const open = Number((price - Math.random() * 1000).toFixed(2));
-        const close = Number((price + Math.random() * 1000).toFixed(2));
-        const high = Number((Math.max(open, close) + Math.random() * 500).toFixed(2));
-        const low = Number((Math.min(open, close) - Math.random() * 500).toFixed(2));
+        // Filter trades untuk hari i
+        const dayStart = now - (30 - i) * 86400;
+        const dayEnd = dayStart + 86400;
+        const dayTrades = trades.filter((t) => t.date >= dayStart && t.date < dayEnd);
+
+        let open, close, high, low;
+        if (dayTrades.length) {
+          open = parseFloat(dayTrades[0].price);
+          close = parseFloat(dayTrades[dayTrades.length - 1].price);
+          high = Math.max(...dayTrades.map((t) => parseFloat(t.price)));
+          low = Math.min(...dayTrades.map((t) => parseFloat(t.price)));
+        } else {
+          // Jika tidak ada trades, pakai harga terakhir ticker
+          const price = parseFloat(tickerData.ticker.last);
+          open = close = high = low = price;
+        }
         dummyCandles.push({
-          time: Math.floor(Date.now() / 1000) - (30 - i) * 86400,
+          time: dayStart,
           open,
           high,
           low,
@@ -45,13 +69,13 @@ export default function Home() {
       }
       setCandleData(dummyCandles);
     } catch (err) {
-      console.error(err);
+      console.error("Failed fetching ticker or candle:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  // Update chart tiap 5 detik jika pair dipilih
+  // Auto refresh chart tiap 5 detik
   useEffect(() => {
     if (!selectedPair) {
       setTicker(null);
@@ -86,20 +110,39 @@ export default function Home() {
       {/* BODY: List Market Crypto */}
       <main className="main">
         <h1>List Market Crypto</h1>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
+          {markets.map((m) => (
+            <button
+              key={m.pair}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "8px",
+                border: selectedPair === m.pair ? "2px solid #4caf50" : "1px solid #eaeaea",
+                background: selectedPair === m.pair ? "#e6fbe8" : "#fff",
+                cursor: "pointer",
+                fontWeight: "bold",
+                color: "#25254a",
+              }}
+              onClick={() => setSelectedPair(m.pair)}
+            >
+              {m.pair.toUpperCase()}
+            </button>
+          ))}
+        </div>
         <table className="table">
           <thead>
             <tr>
               <th>Symbol</th>
-              <th>Last Price</th>
-              <th>Volume</th>
+              <th>Base</th>
+              <th>Counter</th>
             </tr>
           </thead>
           <tbody>
             {markets.map((m, i) => (
               <tr key={i}>
-                <td>{m.symbol}</td>
-                <td>{m.last}</td>
-                <td>{m.vol}</td>
+                <td>{m.pair.toUpperCase()}</td>
+                <td>{m.base_currency.toUpperCase()}</td>
+                <td>{m.counter_currency.toUpperCase()}</td>
               </tr>
             ))}
           </tbody>
@@ -108,22 +151,13 @@ export default function Home() {
         {/* MARKET PREDICTION & CHART */}
         <section style={{ marginTop: "48px" }}>
           <h2>Prediksi & Chart Market Crypto</h2>
-          <div style={{ margin: "20px 0" }}>
-            <label>Pilih Ticker: </label>
-            <select
-              value={selectedPair}
-              onChange={(e) => setSelectedPair(e.target.value)}
-            >
-              <option value="">-- Pilih Pair --</option>
-              {popularPairs.map((pair) => (
-                <option key={pair} value={pair}>
-                  {pair.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+          {selectedPair && (
+            <div style={{ margin: "16px 0" }}>
+              <b>Pair dipilih: {selectedPair.toUpperCase()}</b>
+            </div>
+          )}
 
-          {loading && <p>Memuat data ticker...</p>}
+          {loading && <p>Memuat data ticker & candle...</p>}
 
           {ticker && (
             <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
