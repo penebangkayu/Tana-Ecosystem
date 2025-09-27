@@ -30,20 +30,16 @@ export default function Home() {
   async function fetchTickerAndCandle(pair) {
     setLoading(true);
     try {
-      // Ticker
       const res = await fetch(`https://indodax.com/api/${pair}/ticker`);
       const tickerData = await res.json();
       setTicker(tickerData.ticker);
 
-      // Candlestick (ambil dari trades, simulasi OHLC)
       const tradesRes = await fetch(`https://indodax.com/api/${pair}/trades`);
       const trades = await tradesRes.json();
 
-      // Simulasi candle: 30 candle harian dari trades
       const dummyCandles = [];
       const now = Math.floor(Date.now() / 1000);
       for (let i = 0; i < 30; i++) {
-        // Filter trades untuk hari i
         const dayStart = now - (30 - i) * 86400;
         const dayEnd = dayStart + 86400;
         const dayTrades = trades.filter((t) => t.date >= dayStart && t.date < dayEnd);
@@ -55,7 +51,6 @@ export default function Home() {
           high = Math.max(...dayTrades.map((t) => parseFloat(t.price)));
           low = Math.min(...dayTrades.map((t) => parseFloat(t.price)));
         } else {
-          // Jika tidak ada trades, pakai harga terakhir ticker
           const price = parseFloat(tickerData.ticker.last);
           open = close = high = low = price;
         }
@@ -94,15 +89,62 @@ export default function Home() {
   return (
     <div>
       {/* HEADER */}
-      <header className="header">
-        <div className="logo">Tana Ecosystem</div>
+      <header
+        className="header"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 20px",
+          background: "#fff",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        {/* Logo */}
+        <div className="logo">
+          <img
+            src="/logo-tana-ecosystem.png"
+            alt="Tana Ecosystem"
+            style={{ height: "40px" }}
+          />
+        </div>
+
+        {/* Navigation */}
         <nav>
-          <ul>
-            <li><a href="#">Login</a></li>
-            <li><a href="#">Market</a></li>
-            <li><a href="#">Team</a></li>
-            <li><a href="#">Tentang Kami</a></li>
-            <li><a href="#">Trade Engine</a></li>
+          <ul
+            style={{
+              display: "flex",
+              gap: "20px",
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            <li>
+              <a href="#" style={{ textDecoration: "none", color: "#25254a" }}>
+                Login
+              </a>
+            </li>
+            <li>
+              <a href="#" style={{ textDecoration: "none", color: "#25254a" }}>
+                Market
+              </a>
+            </li>
+            <li>
+              <a href="#" style={{ textDecoration: "none", color: "#25254a" }}>
+                Team
+              </a>
+            </li>
+            <li>
+              <a href="#" style={{ textDecoration: "none", color: "#25254a" }}>
+                Tentang Kami
+              </a>
+            </li>
+            <li>
+              <a href="#" style={{ textDecoration: "none", color: "#25254a" }}>
+                Trade Engine
+              </a>
+            </li>
           </ul>
         </nav>
       </header>
@@ -110,14 +152,22 @@ export default function Home() {
       {/* BODY: List Market Crypto */}
       <main className="main">
         <h1>List Market Crypto</h1>
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+            marginBottom: "24px",
+          }}
+        >
           {markets.map((m) => (
             <button
               key={m.pair}
               style={{
                 padding: "10px 18px",
                 borderRadius: "8px",
-                border: selectedPair === m.pair ? "2px solid #4caf50" : "1px solid #eaeaea",
+                border:
+                  selectedPair === m.pair ? "2px solid #4caf50" : "1px solid #eaeaea",
                 background: selectedPair === m.pair ? "#e6fbe8" : "#fff",
                 cursor: "pointer",
                 fontWeight: "bold",
@@ -160,7 +210,14 @@ export default function Home() {
           {loading && <p>Memuat data ticker & candle...</p>}
 
           {ticker && (
-            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                flexWrap: "wrap",
+                marginBottom: "20px",
+              }}
+            >
               <div
                 style={{
                   flex: 1,
@@ -181,7 +238,14 @@ export default function Home() {
           )}
 
           {candleData.length > 0 && (
-            <div style={{ background: "#fff", borderRadius: 12, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: 12,
+                padding: 16,
+                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+              }}
+            >
               <CandlestickChart data={candleData} />
             </div>
           )}
