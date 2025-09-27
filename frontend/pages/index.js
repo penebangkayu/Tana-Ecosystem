@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import CandlestickChart from "../components/candlestickchart";
 
 export default function Home() {
@@ -7,44 +7,56 @@ export default function Home() {
   const [ticker, setTicker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [candleData, setCandleData] = useState([]);
+  const intervalRef = useRef();
 
   const popularPairs = ["btc_idr", "xrp_idr", "eth_idr"];
 
-  useEffect(() => {
-    if (!selectedPair) return;
-
+  // Fungsi ambil data ticker & candle
+  async function fetchTickerAndCandle(pair) {
     setLoading(true);
-    async function fetchTicker() {
-      try {
-        const res = await fetch(`https://indodax.com/api/${selectedPair}/ticker`);
-        const data = await res.json();
-        setTicker(data.ticker);
+    try {
+      const res = await fetch(`https://indodax.com/api/${pair}/ticker`);
+      const data = await res.json();
+      setTicker(data.ticker);
 
-        // dummy candlestick data
-        const dummyCandles = [];
-        let price = parseFloat(data.ticker.last);
-        for (let i = 0; i < 30; i++) {
-          const open = price - Math.random() * 1000;
-          const close = price + Math.random() * 1000;
-          const high = Math.max(open, close) + Math.random() * 500;
-          const low = Math.min(open, close) - Math.random() * 500;
-          dummyCandles.push({
-            time: Math.floor(Date.now() / 1000) - (30 - i) * 86400,
-            open,
-            high,
-            low,
-            close,
-          });
-        }
-        setCandleData(dummyCandles);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      // dummy candlestick data (simulasi, bisa diganti API asli)
+      const dummyCandles = [];
+      let price = parseFloat(data.ticker.last);
+      for (let i = 0; i < 30; i++) {
+        const open = price - Math.random() * 1000;
+        const close = price + Math.random() * 1000;
+        const high = Math.max(open, close) + Math.random() * 500;
+        const low = Math.min(open, close) - Math.random() * 500;
+        dummyCandles.push({
+          time: Math.floor(Date.now() / 1000) - (30 - i) * 86400,
+          open,
+          high,
+          low,
+          close,
+        });
       }
+      setCandleData(dummyCandles);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchTicker();
+  // Efek: ambil data setiap 5 detik jika pair dipilih
+  useEffect(() => {
+    if (!selectedPair) {
+      setTicker(null);
+      setCandleData([]);
+      return;
+    }
+    fetchTickerAndCandle(selectedPair);
+
+    intervalRef.current = setInterval(() => {
+      fetchTickerAndCandle(selectedPair);
+    }, 5000);
+
+    return () => clearInterval(intervalRef.current);
   }, [selectedPair]);
 
   return (
