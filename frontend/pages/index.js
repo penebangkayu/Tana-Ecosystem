@@ -11,7 +11,6 @@ export default function Home() {
 
   const popularPairs = ["btc_idr", "xrp_idr", "eth_idr"];
 
-  // Fungsi ambil data ticker & candle
   async function fetchTickerAndCandle(pair) {
     setLoading(true);
     try {
@@ -19,14 +18,14 @@ export default function Home() {
       const data = await res.json();
       setTicker(data.ticker);
 
-      // dummy candlestick data (simulasi, bisa diganti API asli)
+      // Pastikan format data candle benar
       const dummyCandles = [];
       let price = parseFloat(data.ticker.last);
       for (let i = 0; i < 30; i++) {
-        const open = price - Math.random() * 1000;
-        const close = price + Math.random() * 1000;
-        const high = Math.max(open, close) + Math.random() * 500;
-        const low = Math.min(open, close) - Math.random() * 500;
+        const open = Number((price - Math.random() * 1000).toFixed(2));
+        const close = Number((price + Math.random() * 1000).toFixed(2));
+        const high = Number((Math.max(open, close) + Math.random() * 500).toFixed(2));
+        const low = Number((Math.min(open, close) - Math.random() * 500).toFixed(2));
         dummyCandles.push({
           time: Math.floor(Date.now() / 1000) - (30 - i) * 86400,
           open,
@@ -43,7 +42,6 @@ export default function Home() {
     }
   }
 
-  // Efek: ambil data setiap 5 detik jika pair dipilih
   useEffect(() => {
     if (!selectedPair) {
       setTicker(null);
@@ -98,6 +96,9 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Debug: lihat data candle di browser */}
+      {/* <pre>{JSON.stringify(candleData, null, 2)}</pre> */}
 
       {candleData.length > 0 && <CandlestickChart data={candleData} />}
     </div>
