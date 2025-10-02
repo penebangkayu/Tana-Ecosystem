@@ -123,7 +123,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
               <tr
                 key={coin.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-200 dark:border-gray-700"
-                onClick={() => router.push(`/coin/${coin.id}`)} // navigasi ke page baru
+                onClick={() => router.push(`/coin/${coin.id}`)}
               >
                 <td className="px-4 py-2 text-gray-900 dark:text-gray-100 font-medium">{index + 1}</td>
                 <td className="px-4 py-2 flex items-center gap-2">
@@ -138,11 +138,11 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
                 </td>
                 <td
                   className={clsx(
-                    'px-4 py-2 text-right font-medium',
+                    'px-4 py-2 text-right font-medium flex items-center justify-end gap-1',
                     coin.price_change_percentage_24h > 0 ? 'text-green-500' : 'text-red-500'
                   )}
                 >
-                  {coin.price_change_percentage_24h?.toFixed(2)}%
+                  {coin.price_change_percentage_24h > 0 ? '▲' : '▼'} {coin.price_change_percentage_24h?.toFixed(2)}%
                 </td>
                 <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
                   IDR {coin.market_cap.toLocaleString('id-ID')}

@@ -31,12 +31,12 @@ export default function NewsList() {
   }, [])
 
   if (!news || news.length === 0) {
-    return <p className="text-gray-500">No news available</p>
+    return <p className="text-gray-500 px-4">No news available</p>
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 overflow-hidden">
-      <ul className="space-y-3">
+    <div className="max-w-4xl mx-auto px-4 overflow-x-auto">
+      <ul className="space-y-3 min-w-full">
         {news.slice(0, 5).map((item, index) => (
           <li
             key={index}
@@ -46,7 +46,7 @@ export default function NewsList() {
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-20 h-20 object-cover rounded flex-shrink-0 max-w-full"
+                className="w-20 h-20 object-cover rounded flex-shrink-0"
               />
             )}
             <div className="flex-1 min-w-0">

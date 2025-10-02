@@ -1,165 +1,153 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { createChart, IChartApi, ICandleSeriesApi } from 'lightweight-charts'
+import { useEffect, useState } from 'react'
+import CandlestickChart from '@/components/charts/CandlestickChart'
 
-// Dummy function for AI prediction using Gemini API (replace with your key)
-async function analyzeWithAI(symbol: string) {
-  try {
-    const res = await fetch(`https://api.gemini.com/v1/predict?symbol=${symbol}`)
-    const data = await res.json()
-    return data
-  } catch (err) {
-    console.error('AI analysis error:', err)
-    return null
-  }
-}
+export default function AIPredictionsPage() {
+  const [coin, setCoin] = useState('bitcoin')
+  const [coins, setCoins] = useState<{ id: string; symbol: string; name: string; image?: string }[]>([])
+  const [timeframe, setTimeframe] = useState('1h')
+  const [limit, setLimit] = useState(100)
+  const [candles, setCandles] = useState<any[]>([])
+  const [analysis, setAnalysis] = useState<string>('')
 
-// Exchange options
-const indodaxPairs = ['BTC/IDR', 'ETH/IDR', 'XRP/IDR']
-const binancePairs = ['BTCUSDT', 'ETHUSDT']
-
-export default function AiPredictionsPage() {
-  const chartContainerRef = useRef<HTMLDivElement | null>(null)
-  const chartRef = useRef<IChartApi | null>(null)
-  const seriesRef = useRef<ICandleSeriesApi | null>(null)
-
-  const [selectedExchange, setSelectedExchange] = useState<'Indodax' | 'Binance'>('Indodax')
-  const [selectedPair, setSelectedPair] = useState(indodaxPairs[0])
-  const [candleData, setCandleData] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [aiResult, setAiResult] = useState<any>(null)
-
-  // Initialize chart
+  // Fetch coins realtime dari CoinGecko (pakai endpoint market biar ada logo)
   useEffect(() => {
-    if (!chartContainerRef.current) return
-
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: 400,
-      layout: { backgroundColor: '#ffffff', textColor: '#000' },
-      grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
-      crosshair: { mode: 1 },
-      rightPriceScale: { borderColor: '#ccc' },
-      timeScale: { borderColor: '#ccc', timeVisible: true, secondsVisible: false },
-    })
-
-    const series = chart.addCandlestickSeries()
-    chartRef.current = chart
-    seriesRef.current = series
-
-    return () => chart.remove()
+    async function fetchCoins() {
+      try {
+        const res = await fetch(
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr&order=market_cap_desc&per_page=200&page=1&sparkline=false'
+        )
+        const data = await res.json()
+        setCoins(data)
+      } catch (err) {
+        console.error('Gagal load coins:', err)
+      }
+    }
+    fetchCoins()
   }, [])
 
-  // Fetch candle data
-  const fetchCandleData = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      let data: any[] = []
-      if (selectedExchange === 'Indodax') {
-        const pairApi = selectedPair.toLowerCase().replace('/', '_')
-        const res = await fetch(`https://indodax.com/api/${pairApi}/trades`)
-        const json = await res.json()
-        // Convert trades to OHLC per minute (simplified)
-        data = json.trades.map((t: any) => ({
-          time: Math.floor(t.date),
-          open: parseFloat(t.price),
-          high: parseFloat(t.price),
-          low: parseFloat(t.price),
-          close: parseFloat(t.price),
-        }))
-      } else {
-        // Binance
-        const symbol = selectedPair
-        const interval = '1m'
-        const limit = 100
-        const res = await fetch(
-          `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
-        )
-        const json = await res.json()
-        data = json.map((d: any) => ({
-          time: d[0] / 1000, // UNIX timestamp in seconds
-          open: parseFloat(d[1]),
-          high: parseFloat(d[2]),
-          low: parseFloat(d[3]),
-          close: parseFloat(d[4]),
-        }))
-      }
+  // Mapping timeframe ke days (CoinGecko OHLC param)
+  const timeframeMap: Record<string, string> = {
+    '5m': '1',
+    '15m': '1',
+    '1h': '1',
+    '4h': '7',
+    '1d': '30',
+    '1y': '365',
+  }
 
-      setCandleData(data)
-      if (seriesRef.current) seriesRef.current.setData(data)
+  // Fetch candles setiap coin/timeframe berubah
+  useEffect(() => {
+    async function fetchCandles() {
+      try {
+        const days = timeframeMap[timeframe] || '1'
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/coins/${coin}/ohlc?vs_currency=idr&days=${days}`
+        )
+
+        const data = await res.json()
+        const parsed = data.slice(-limit).map((d: any) => ({
+          time: Math.floor(d[0] / 1000), // biar cocok sama lightweight-charts
+          open: d[1],
+          high: d[2],
+          low: d[3],
+          close: d[4],
+        }))
+        setCandles(parsed)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    if (coin) fetchCandles()
+  }, [coin, timeframe, limit])
+
+  // Kirim data candle ke AI untuk analisis
+  async function handleAnalysis() {
+    setAnalysis('⏳ Sedang menganalisis...')
+    try {
+      const res = await fetch('/api/gemini/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coin, candles, timeframe, limit }),
+      })
+      const data = await res.json()
+      if (data.analysis) setAnalysis(data.analysis)
+      else setAnalysis('⚠️ Gagal mendapatkan analisis.')
     } catch (err: any) {
-      console.error(err)
-      setError('Failed to fetch candle data.')
-    } finally {
-      setLoading(false)
+      setAnalysis('Error: ' + err.message)
     }
   }
 
-  const handleAnalyze = async () => {
-    const result = await analyzeWithAI(selectedPair)
-    setAiResult(result)
-  }
-
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">AI Predictions</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">AI Crypto Predictions</h1>
 
-      {/* Exchange & Pair Selection */}
-      <div className="flex flex-wrap gap-4 mb-4">
+      {/* Controls */}
+      <div className="flex flex-wrap gap-4 items-center">
+        {/* Dropdown coins realtime (ada logo + ticker) */}
         <select
-          className="border px-2 py-1"
-          value={selectedExchange}
-          onChange={(e) => {
-            const val = e.target.value as 'Indodax' | 'Binance'
-            setSelectedExchange(val)
-            setSelectedPair(val === 'Indodax' ? indodaxPairs[0] : binancePairs[0])
-          }}
+          value={coin}
+          onChange={(e) => setCoin(e.target.value)}
+          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white"
         >
-          <option value="Indodax">Indodax</option>
-          <option value="Binance">Binance</option>
+          {coins.length === 0 ? (
+            <option>Loading coins...</option>
+          ) : (
+            coins.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.symbol.toUpperCase()} - {c.name}
+              </option>
+            ))
+          )}
         </select>
 
+        {/* Dropdown timeframe */}
         <select
-          className="border px-2 py-1"
-          value={selectedPair}
-          onChange={(e) => setSelectedPair(e.target.value)}
+          value={timeframe}
+          onChange={(e) => setTimeframe(e.target.value)}
+          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white"
         >
-          {(selectedExchange === 'Indodax' ? indodaxPairs : binancePairs).map((p) => (
-            <option key={p} value={p}>
-              {p}
+          <option value="5m">5 Menit</option>
+          <option value="15m">15 Menit</option>
+          <option value="1h">1 Jam</option>
+          <option value="4h">4 Jam</option>
+          <option value="1d">1 Hari</option>
+          <option value="1y">1 Tahun</option>
+        </select>
+
+        {/* Dropdown limit */}
+        <select
+          value={limit}
+          onChange={(e) => setLimit(Number(e.target.value))}
+          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white"
+        >
+          {[100, 200, 300, 400, 500, 1000].map((val) => (
+            <option key={val} value={val}>
+              {val} Candle
             </option>
           ))}
         </select>
 
         <button
-          className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-          onClick={fetchCandleData}
+          onClick={handleAnalysis}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
-          Load Candles
-        </button>
-
-        <button
-          className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600"
-          onClick={handleAnalyze}
-        >
-          Analyze AI
+          Analisis AI
         </button>
       </div>
 
-      {loading && <p>Loading candle data...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Chart */}
+      <div className="border rounded p-4 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <CandlestickChart data={candles} />
+      </div>
 
-      <div ref={chartContainerRef} className="w-full h-96 mb-4" />
-
-      {aiResult && (
-        <div className="bg-white p-4 border rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">AI Result:</h2>
-          <pre>{JSON.stringify(aiResult, null, 2)}</pre>
-        </div>
-      )}
+      {/* Analysis Result */}
+      <div className="border rounded p-4 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+        <h2 className="font-semibold mb-2">📊 Hasil Analisis AI:</h2>
+        <p className="whitespace-pre-line">{analysis}</p>
+      </div>
     </div>
   )
 }

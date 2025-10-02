@@ -1,39 +1,110 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { createChart } from "lightweight-charts"
+import { useEffect, useRef, useState } from "react"
+import { createChart, IChartApi, ISeriesApi, CandlestickData, LineData } from "lightweight-charts"
 
-interface PredictionChartProps {
-  coinId: string
-}
-
-export default function PredictionChart({ coinId }: PredictionChartProps) {
-  const [chartContainer, setChartContainer] = useState<HTMLDivElement | null>(null)
+export default function PredictionChart() {
+  const chartContainerRef = useRef<HTMLDivElement | null>(null)
+  const chartRef = useRef<IChartApi | null>(null)
+  const [coinId, setCoinId] = useState<string>("bitcoin")
+  const [coins, setCoins] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
-    if (!chartContainer) return
+    // Ambil daftar koin dari CoinGecko API
+    const fetchCoins = async () => {
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/coins/list")
+        const data = await res.json()
+        setCoins(data)
+      } catch (error) {
+        console.error("Gagal mengambil daftar koin:", error)
+      }
+    }
 
-    const chart = createChart(chartContainer, { width: chartContainer.clientWidth, height: 400 })
-    const lineSeries = chart.addLineSeries()
+    fetchCoins()
+  }, [])
 
+  useEffect(() => {
+    if (!chartContainerRef.current) return
+    const container = chartContainerRef.current
+
+    // Inisialisasi chart
+    const chart = createChart(container, {
+      width: container.clientWidth,
+      height: 400,
+      layout: { backgroundColor: "#fff", textColor: "#000" },
+      grid: { vertLines: { color: "#eee" }, horzLines: { color: "#eee" } },
+      crosshair: { mode: 1 },
+    })
+    chartRef.current = chart
+
+    const candleSeries: ISeriesApi<"Candlestick"> = chart.addCandlestickSeries()
+    const lineSeries: ISeriesApi<"Line"> = chart.addLineSeries({ color: "red", lineWidth: 2 })
+
+    // Ambil data OHLC
     const fetchData = async () => {
-      const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=1m`)
-      const data = await res.json()
-      const prices = data.prices.map((p: [number, number]) => ({
-        time: Math.floor(p[0] / 1000), // convert ms → sec
-        value: p[1]
-      }))
-      lineSeries.setData(prices)
+      try {
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=1`
+        )
+        const data: [number, number, number, number, number][] = await res.json()
+        if (!data) return
+
+        const candles: CandlestickData[] = data.map(([time, open, high, low, close]) => ({
+          time: Math.floor(time / 1000),
+          open,
+          high,
+          low,
+          close,
+        }))
+        candleSeries.setData(candles)
+
+        // Mock prediksi ±0.5% dari close terakhir
+        const last = candles[candles.length - 1]
+        const mock: LineData[] = Array.from({ length: 20 }, (_, i) => ({
+          time: last.time + (i + 1) * 60,
+          value: last.close * (1 + (Math.random() - 0.5) * 0.01),
+        }))
+        lineSeries.setData(mock)
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 30000) // refresh tiap 30 detik
+
+    // Responsif
+    const resizeObserver = new ResizeObserver(() => {
+      chart.applyOptions({ width: container.clientWidth })
+    })
+    resizeObserver.observe(container)
 
     return () => {
-      clearInterval(interval)
       chart.remove()
+      resizeObserver.disconnect()
     }
-  }, [coinId, chartContainer])
+  }, [coinId])
 
-  return <div ref={setChartContainer} className="w-full h-[400px]" />
+  return (
+    <div>
+      {/* Dropdown koin */}
+      <div className="mb-4">
+        <label className="mr-2 font-semibold text-gray-800 dark:text-gray-200">Pilih Koin:</label>
+        <select
+          className="border rounded px-2 py-1"
+          value={coinId}
+          onChange={(e) => setCoinId(e.target.value)}
+        >
+          {coins.map((coin) => (
+            <option key={coin.id} value={coin.id}>
+              {coin.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Kontainer chart */}
+      <div ref={chartContainerRef} className="w-full h-[400px]" />
+    </div>
+  )
 }
