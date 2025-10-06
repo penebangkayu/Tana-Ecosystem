@@ -22,7 +22,7 @@ export default function AIPredictionsPage() {
   const [coin, setCoin] = useState('bitcoin')
   const [coins, setCoins] = useState<{ id: string; symbol: string; name: string; image?: string }[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [timeframe, setTimeframe] = useState('1h')
+  const [timeframe, setTimeframe] = useState<string>('1h') // ✅ tetap string, tapi nanti dicocokkan
   const [limit, setLimit] = useState(100)
   const [candles, setCandles] = useState<any[]>([])
   const [analysis, setAnalysis] = useState<string>('')
@@ -262,7 +262,8 @@ export default function AIPredictionsPage() {
               <div className="loader border-4 border-t-blue-500 border-gray-200 rounded-full w-12 h-12 animate-spin"></div>
             </div>
           )}
-          <CoinChart coinId={coin} vsCurrency="idr" timeframe={timeframe} />
+          {/* ✅ Casting aman ke tipe union yang diterima oleh CoinChart */}
+          <CoinChart coinId={coin} vsCurrency="idr" timeframe={timeframe as '1D' | '7D' | '30D' | '1Y'} />
         </div>
 
         <div className="flex-1 border rounded p-4 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 flex flex-col justify-between">

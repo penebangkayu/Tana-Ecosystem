@@ -32,6 +32,7 @@ export default function CoinPage() {
   useEffect(() => {
     const fetchCoinSummary = async () => {
       try {
+        const coinId = Array.isArray(id) ? id[0] : id;
         const res = await fetch(`https://api.coingecko.com/api/v3/coins/${id.toLowerCase()}`)
         const data = await res.json()
         setCoinSummary({
