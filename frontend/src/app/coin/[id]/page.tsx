@@ -32,8 +32,9 @@ export default function CoinPage() {
   useEffect(() => {
     const fetchCoinSummary = async () => {
       try {
-        const coinId = Array.isArray(id) ? id[0] : id;
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/${id.toLowerCase()}`)
+        // ✅ Fix di sini: pastikan id selalu string
+        const coinId = Array.isArray(id) ? id[0] : id
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId.toLowerCase()}`)
         const data = await res.json()
         setCoinSummary({
           image: data.image.small,
@@ -123,7 +124,8 @@ export default function CoinPage() {
 
       {/* Chart Section */}
       <section className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full">
-        <CoinChart coinId={id} vsCurrency="idr" timeframe={timeframe} />
+        {/* ✅ Fix di sini juga: selalu kirim string ke CoinChart */}
+        <CoinChart coinId={Array.isArray(id) ? id[0] : id} vsCurrency="idr" timeframe={timeframe} />
       </section>
 
       {/* NewsList Section */}
