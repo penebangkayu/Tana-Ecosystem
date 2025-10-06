@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { ethers, EventLog } from 'ethers'
 import { Trade, Route, SwapRouter, Pool } from '@uniswap/v3-sdk'
 import { Token, Percent, CurrencyAmount } from '@uniswap/sdk-core'
 import { useWallet } from '../../components/contexts/WalletContext'
@@ -383,6 +383,7 @@ export default function DexPage() {
           setErrorMessage('Factory not available for this DEX.')
           return
         }
+
         const provider = window.ethereum
           ? new ethers.BrowserProvider(window.ethereum)
           : new ethers.JsonRpcProvider(selectedDex.rpcUrl)
@@ -390,19 +391,31 @@ export default function DexPage() {
 
         const filter = poolContract.filters.Swap(null, walletAddress)
         const events = await poolContract.queryFilter(filter, -10000, 'latest')
+
         const transactions = await Promise.all(
-          events.map(async event => {
-            const tx = await provider.getTransaction(event.transactionHash)
+          events.map(async (event) => {
+            // ✅ pastikan tipe event adalah EventLog
+            const evt = event as EventLog
+            const tx = await provider.getTransaction(evt.transactionHash)
+            const block = await provider.getBlock(evt.blockNumber)
+
             return {
-              id: event.transactionHash,
-              timestamp: (await provider.getBlock(event.blockNumber))?.timestamp,
-              amount0: ethers.formatUnits(event.args.amount0, tokenList.find(t => t.address === poolData.token0)?.decimals || 18),
-              amount1: ethers.formatUnits(event.args.amount1, tokenList.find(t => t.address === poolData.token1)?.decimals || 18),
+              id: evt.transactionHash,
+              timestamp: block?.timestamp,
+              amount0: ethers.formatUnits(
+                evt.args?.amount0 ?? 0,
+                tokenList.find(t => t.address === poolData.token0)?.decimals || 18
+              ),
+              amount1: ethers.formatUnits(
+                evt.args?.amount1 ?? 0,
+                tokenList.find(t => t.address === poolData.token1)?.decimals || 18
+              ),
               token0: { symbol: tokenList.find(t => t.address === poolData.token0)?.symbol || 'Unknown' },
               token1: { symbol: tokenList.find(t => t.address === poolData.token1)?.symbol || 'Unknown' },
             }
           })
         )
+
         setTransactionHistory(transactions.slice(0, 10))
       } catch (error) {
         console.error('Failed to fetch transaction history:', error)
@@ -411,6 +424,7 @@ export default function DexPage() {
       }
       setLoadingHistory(false)
     }
+
     fetchTransactionHistory()
   }, [walletAddress, swapDex, poolData, tokenList])
 
