@@ -2,16 +2,24 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-  baseURL: 'https://api.coingecko.com/api/v3', // Tetap gunakan CoinGecko sebagai placeholder
+  baseURL: 'https://api.coingecko.com/api/v3', // Placeholder aman
   timeout: 10000,
 });
 
-// Fungsi dummy untuk getUsers dan deleteUser
+// Ekspor dummy untuk menghindari error impor
 export async function getUsers() {
-  return []; // Kembalikan array kosong sebagai placeholder
+  return []; // Array kosong sebagai placeholder
 }
 
 export async function deleteUser(id: string) {
-  console.log(`Deleting user ${id} - dummy function`);
-  return { success: true }; // Kembalikan respons dummy
+  console.log(`Dummy delete for id: ${id}`);
+  return { success: true };
+}
+
+export async function fetchMarketHistory() {
+  return []; // Placeholder untuk markets/[symbol]
+}
+
+export async function fetchIndodaxMarket() {
+  return []; // Placeholder untuk indodax
 }
