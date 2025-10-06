@@ -1,35 +1,33 @@
-'use client'
+'use client';
 
-import { ReactNode } from 'react'
-import Header from '@/components/header/Header'
-import Footer from '@/components/footer/Footer'
-import ThemeToggle from '@/components/theme-toggle/ThemeToggle'
-import '../../styles/globals.css'
+import '../../styles/globals.css';
+import { ReactNode } from 'react';
+import { SessionProvider } from 'next-auth/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WalletProvider } from '../components/contexts/WalletContext';
+import Header from '@/components/header/Header';
+import Footer from '@/components/footer/Footer';
 
-interface LayoutProps {
-  children: ReactNode
+const queryClient = new QueryClient();
+
+interface RootLayoutProps {
+  children: ReactNode;
 }
 
-export default function RootLayout({ children }: LayoutProps) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen bg-white-100 text-gray-900">
-        {/* Header tanpa border */}
-        <Header />
-
-        {/* Main content */}
-        <main className="flex-1 container mx-auto p-0 space-y-8">
-          {children}
-        </main>
-
-        {/* Footer tanpa border */}
-        <Footer />
-
-        {/* Theme toggle fixed */}
-        <div className="fixed bottom-4 right-4">
-          <ThemeToggle />
-        </div>
+      <body>
+        <QueryClientProvider client={queryClient}>
+          <SessionProvider>
+            <WalletProvider>
+              <Header />
+              <main>{children}</main>
+              <Footer />
+            </WalletProvider>
+          </SessionProvider>
+        </QueryClientProvider>
       </body>
     </html>
-  )
+  );
 }

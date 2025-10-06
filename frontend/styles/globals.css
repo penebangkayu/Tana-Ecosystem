@@ -28,3 +28,173 @@ html.dark body {
   background-color: #111827;
   color: #f7f9fa;
 }
+
+/* Universe Background */
+.universe-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(180deg, #ffffff 0%, #e6f0ff 100%); /* Light mode: white to light blue */
+  overflow: hidden;
+}
+
+html.dark .universe-bg {
+  background: linear-gradient(180deg, #111827 0%, #1e3a8a 100%); /* Dark mode: dark gray to deep blue */
+}
+
+/* Stars */
+.universe-bg::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 1px,
+    transparent 1px
+  ),
+  radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.7) 1px,
+    transparent 1px
+  );
+  background-size: 50px 50px, 60px 60px;
+  background-position: 0 0, 30px 30px;
+  animation: twinkle 4s infinite ease-in-out;
+}
+
+/* Particles (cosmic dust/meteors) */
+.universe-bg::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 200, 0.5) 1px,
+    transparent 1px
+  );
+  background-size: 100px 100px;
+  background-position: 20px 20px;
+  animation: move-particles 20s linear infinite;
+}
+
+/* Overlay for readability */
+.universe-bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%); /* Light mode */
+  pointer-events: none;
+}
+
+html.dark .universe-bg-overlay {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%); /* Dark mode */
+}
+
+/* -------------------- Animasi -------------------- */
+
+/* Naik-turun halus */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Goyang kiri-kanan */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+.animate-shake {
+  animation: shake 1.5s ease-in-out infinite;
+}
+
+/* Animasi gradient untuk tombol hover */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animate-gradient {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Animasi fade-in untuk teks dan logo */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+/* Animasi untuk bintang */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Animasi untuk partikel (debu kosmik) */
+@keyframes move-particles {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-100px, -100px);
+  }
+}
+{`/* ... (kode sebelumnya tetap sama) ... */
+
+/* Border Gradien untuk Swap Interface */
+.border-gradient {
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box, linear-gradient(to right, #3b82f6, #8b5cf6) border-box;
+}
+
+html.dark .border-gradient {
+  background: linear-gradient(#111827, #111827) padding-box, linear-gradient(to right, #3b82f6, #8b5cf6) border-box;
+}
+
+/* ... (kode animasi dan lainnya tetap sama) ... */
+}

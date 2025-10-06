@@ -1,0 +1,12 @@
+{
+  "dashboard": {
+    "markets": "Markets",
+    "priceChart": "{coin} Price Chart",
+    "aiPredictions": "AI Predictions",
+    "aiSelectCoin": "Select a coin in the Market Table to view AI predictions.",
+    "aiDescription": "AI predicts price movements based on historical data and market analysis.",
+    "tradeEngine": "Trade Engine",
+    "tradeDescription": "Trade Engine – AI-powered Automated Trading Solution\nTrade Engine is an automated trading system built with Artificial Intelligence (AI) technology to deliver accurate, safe, and consistent trading decisions.\nBy analyzing real-time market data, Trade Engine helps you optimize strategies, reduce risks, and maximize profit opportunities continuously.\nClick the button below to access the full Trade Engine page:",
+    "openTradeEngine": "Open Trade Engine"
+  }
+}

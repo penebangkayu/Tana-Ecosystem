@@ -1,26 +1,30 @@
-/** @type {import('next').NextConfig} */
+const createNextIntlPlugin = require('next-intl/plugin');
+
+// arahkan plugin ke file request
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "assets.coingecko.com", // domain lama CoinGecko
+        hostname: "assets.coingecko.com",
       },
       {
         protocol: "https",
-        hostname: "coin-images.coingecko.com", // domain baru CoinGecko
+        hostname: "coin-images.coingecko.com",
       },
       {
         protocol: "https",
-        hostname: "www.binance.com", // jaga2 Binance
+        hostname: "www.binance.com",
       },
       {
         protocol: "https",
-        hostname: "indodax.com", // jaga2 Indodax
+        hostname: "indodax.com",
       },
     ],
   },
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);

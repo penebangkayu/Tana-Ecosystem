@@ -1,0 +1,12 @@
+{
+  "dashboard": {
+    "markets": "Markets",
+    "priceChart": "{coin} Price Chart",
+    "aiPredictions": "Prediksi AI",
+    "aiSelectCoin": "Pilih koin di Tabel Pasar untuk melihat prediksi AI.",
+    "aiDescription": "AI memprediksi pergerakan harga berdasarkan data historis dan analisis pasar.",
+    "tradeEngine": "Trade Engine",
+    "tradeDescription": "Trade Engine – Solusi Perdagangan Otomatis Berbasis AI\nMesin Perdagangan adalah sistem trading otomatis yang dibangun dengan teknologi Kecerdasan Buatan (AI) untuk memberikan keputusan perdagangan yang akurat, aman, dan konsisten.\nDengan menganalisis data pasar secara real-time, Mesin Perdagangan membantu Anda mengoptimalkan strategi, mengurangi risiko, dan memaksimalkan peluang keuntungan secara berkelanjutan.\nKlik tombol di bawah untuk membuka halaman Mesin Perdagangan lengkap:",
+    "openTradeEngine": "Buka Trade Engine"
+  }
+}

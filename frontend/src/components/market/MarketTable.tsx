@@ -14,6 +14,9 @@ interface Coin {
   total_volume: number
   price_change_percentage_24h: number
   image: string
+  sparkline_in_7d?: {
+    price: number[]
+  }
 }
 
 interface MarketTableProps {
@@ -22,31 +25,52 @@ interface MarketTableProps {
 
 export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
   const [coins, setCoins] = useState<Coin[]>([])
+  const [allCoins, setAllCoins] = useState<Coin[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
-  const router = useRouter() // untuk navigasi
+  const router = useRouter()
 
   const fetchTopCoins = async () => {
     try {
       setLoading(true)
       const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${pair.toLowerCase()}&order=market_cap_desc&per_page=20&page=1&sparkline=false`
+        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${pair.toLowerCase()}&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h`
       )
       const data = await res.json()
+      // Log sparkline data for debugging
+      console.log('Top coins data:', data.map((coin: Coin) => ({
+        id: coin.id,
+        sparkline: coin.sparkline_in_7d?.price?.length || 'No sparkline data'
+      })))
       setCoins(data)
+      setAllCoins(data)
       setLoading(false)
     } catch (err) {
-      console.error(err)
+      console.error('Error fetching top coins:', err)
       setLoading(false)
     }
   }
 
   const fetchSearchCoins = async (query: string) => {
     if (!query.trim()) {
-      fetchTopCoins()
+      setCoins(allCoins)
       return
     }
+
+    // Client-side filter
+    const filtered = allCoins.filter(
+      (coin) =>
+        coin.name.toLowerCase().includes(query.toLowerCase()) ||
+        coin.symbol.toLowerCase().includes(query.toLowerCase())
+    )
+
+    if (filtered.length > 0) {
+      setCoins(filtered)
+      return
+    }
+
+    // Fallback API fetch
     try {
       setLoading(true)
       const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${query}`)
@@ -60,13 +84,18 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
       const marketRes = await fetch(
         `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${pair.toLowerCase()}&ids=${ids.join(
           ','
-        )}&order=market_cap_desc&per_page=20&page=1&sparkline=false`
+        )}&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=24h`
       )
-      const marketData = await marketRes.json()
+      const marketData = await res.json()
+      // Log sparkline data for debugging
+      console.log('Search coins data:', marketData.map((coin: Coin) => ({
+        id: coin.id,
+        sparkline: coin.sparkline_in_7d?.price?.length || 'No sparkline data'
+      })))
       setCoins(marketData)
       setLoading(false)
     } catch (err) {
-      console.error(err)
+      console.error('Error fetching search coins:', err)
       setLoading(false)
     }
   }
@@ -86,7 +115,89 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       fetchSearchCoins(value)
-    }, 300)
+    }, 200)
+  }
+
+  const clearSearch = () => {
+    setSearch('')
+    fetchTopCoins()
+  }
+
+  // Sparkline chart component
+  const SparklineChart = ({ data, width = 80, height = 30, color }: { 
+    data: number[], 
+    width?: number, 
+    height?: number, 
+    color: string 
+  }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+
+    useEffect(() => {
+      const canvas = canvasRef.current
+      if (!canvas || !data || data.length < 2) {
+        console.log('No valid data for sparkline chart:', data)
+        return
+      }
+
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        console.error('Canvas context not available')
+        return
+      }
+
+      // Set explicit canvas dimensions
+      canvas.width = width
+      canvas.height = height
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height)
+
+      // Find min and max values for scaling
+      const minValue = Math.min(...data)
+      const maxValue = Math.max(...data)
+      const range = maxValue - minValue || 1 // Prevent division by zero
+
+      // Draw line
+      ctx.beginPath()
+      ctx.strokeStyle = color
+      ctx.lineWidth = 1.5
+      ctx.lineCap = 'round'
+
+      const stepX = width / (data.length - 1)
+      data.forEach((value, index) => {
+        const x = index * stepX
+        const normalizedY = height - ((value - minValue) / range * (height - 2)) - 1
+        const y = Math.max(1, Math.min(normalizedY, height - 1))
+
+        if (index === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      })
+
+      ctx.stroke()
+
+      // Add fill below the line
+      ctx.lineTo(width, height)
+      ctx.lineTo(0, height)
+      ctx.fillStyle = `${color}20` // 12.5% opacity
+      ctx.fill()
+    }, [data, width, height, color])
+
+    if (!data || data.length < 2) {
+      return (
+        <div className="w-[80px] h-[30px] bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-500">
+          No data
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex justify-end">
+        <canvas ref={canvasRef} width={width} height={height} className="rounded" />
+      </div>
+    )
   }
 
   if (loading) return <p className="text-gray-500 dark:text-gray-400 px-4">Loading market data...</p>
@@ -95,14 +206,22 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
   return (
     <div className="flex flex-col space-y-4 w-full">
       {/* Search Box */}
-      <div className="px-4">
+      <div className="px-4 relative">
         <input
           type="text"
           placeholder="Search coin..."
           value={search}
           onChange={handleSearchChange}
-          className="w-full p-2 rounded-full border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 pr-10 rounded-full border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
+        {search && (
+          <button
+            onClick={clearSearch}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          >
+            ×
+          </button>
+        )}
       </div>
 
       {/* Market Table */}
@@ -116,6 +235,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
               <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">24h %</th>
               <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Market Cap ({pair})</th>
               <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Volume ({pair})</th>
+              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">7d Chart</th>
             </tr>
           </thead>
           <tbody>
@@ -149,6 +269,12 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
                 </td>
                 <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
                   IDR {coin.total_volume.toLocaleString('id-ID')}
+                </td>
+                <td className="px-4 py-2">
+                  <SparklineChart 
+                    data={coin.sparkline_in_7d?.price || []} 
+                    color={coin.price_change_percentage_24h > 0 ? '#10b981' : '#ef4444'}
+                  />
                 </td>
               </tr>
             ))}

@@ -6,9 +6,8 @@ import { createChart, CrosshairMode, ISeriesApi } from 'lightweight-charts'
 interface CoinChartProps {
   coinId: string
   vsCurrency?: string
+  timeframe?: '1D' | '7D' | '30D' | '1Y'
 }
-
-type TimeframeOption = '15m' | '30m' | '1h' | '1d' | '1y'
 
 interface CoinInfo {
   name: string
@@ -28,37 +27,37 @@ interface CoinInfo {
   }
 }
 
-export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps) {
+export default function CoinChart({ coinId, vsCurrency = 'idr', timeframe = '30D' }: CoinChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null)
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null)
 
-  const [timeframe, setTimeframe] = useState<TimeframeOption>('1d')
   const [isDarkMode, setIsDarkMode] = useState(
     typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
   )
   const [coinInfo, setCoinInfo] = useState<CoinInfo | null>(null)
 
-  // === Timeframe mapping ke Coingecko ===
-  const getCoinGeckoParams = (tf: TimeframeOption) => {
-    switch (tf) {
-      case '15m':
-      case '30m':
+  // Mapping timeframe ke Coingecko
+  const getCoinGeckoParams = () => {
+    switch (timeframe) {
+      case '1D':
         return { days: 1, interval: 'minutely' }
-      case '1h':
+      case '7D':
         return { days: 7, interval: 'hourly' }
-      case '1d':
+      case '30D':
         return { days: 30, interval: 'daily' }
-      case '1y':
+      case '1Y':
         return { days: 365, interval: 'daily' }
+      default:
+        return { days: 30, interval: 'daily' }
     }
   }
 
-  // === Fetch OHLC data ===
+  // Fetch OHLC data
   const fetchOHLC = async () => {
     if (!candleSeriesRef.current) return
     try {
-      const { days } = getCoinGeckoParams(timeframe)
+      const { days } = getCoinGeckoParams()
       const res = await fetch(
         `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=${vsCurrency}&days=${days}`
       )
@@ -77,7 +76,7 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
     }
   }
 
-  // === Fetch coin info ===
+  // Fetch coin info
   const fetchCoinInfo = async () => {
     try {
       const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`)
@@ -89,7 +88,7 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
     }
   }
 
-  // === Dark mode apply options ===
+  // Apply dark mode
   const applyDarkModeOptions = () => {
     if (!chartRef.current) return
     chartRef.current.applyOptions({
@@ -106,12 +105,10 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
     })
   }
 
-  // === Load coin info sekali ===
   useEffect(() => {
     fetchCoinInfo()
   }, [coinId])
 
-  // === Init chart ===
   useEffect(() => {
     if (!chartContainerRef.current) return
 
@@ -141,11 +138,9 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
       wickUpColor: '#26a69a',
     })
 
-    // fetch first time
     fetchOHLC()
     const intervalId = setInterval(fetchOHLC, 15000)
 
-    // resize responsif
     const handleResize = () => {
       if (chartContainerRef.current) {
         chart.applyOptions({ width: chartContainerRef.current.clientWidth })
@@ -153,7 +148,6 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
     }
     window.addEventListener('resize', handleResize)
 
-    // observe darkmode
     const observer = new MutationObserver(() => {
       const dark = document.documentElement.classList.contains('dark')
       setIsDarkMode(dark)
@@ -168,35 +162,13 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
     }
   }, [coinId, vsCurrency, timeframe])
 
-  // === Apply dark mode realtime ===
   useEffect(() => {
     applyDarkModeOptions()
-  }, [isDarkMode])
-
-  // === Re-fetch OHLC jika timeframe berubah ===
-  useEffect(() => {
     fetchOHLC()
-  }, [timeframe])
+  }, [isDarkMode, timeframe])
 
   return (
     <div>
-      {/* Timeframe selector */}
-      <div className="flex gap-2 mb-2 flex-wrap">
-        {(['15m', '30m', '1h', '1d', '1y'] as TimeframeOption[]).map(tf => (
-          <button
-            key={tf}
-            onClick={() => setTimeframe(tf)}
-            className={`px-3 py-1 rounded transition-colors ${
-              timeframe === tf
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-            }`}
-          >
-            {tf}
-          </button>
-        ))}
-      </div>
-
       {/* Chart */}
       <div
         ref={chartContainerRef}
@@ -217,12 +189,10 @@ export default function CoinChart({ coinId, vsCurrency = 'idr' }: CoinChartProps
             {Object.keys(coinInfo.platforms).filter(k => coinInfo.platforms[k]).join(', ') || 'N/A'}
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-            <strong>Website:</strong>{' '}
-            {coinInfo.links.homepage.filter(Boolean).join(', ') || 'N/A'}
+            <strong>Website:</strong> {coinInfo.links.homepage.filter(Boolean).join(', ') || 'N/A'}
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
-            <strong>About:</strong>{' '}
-            {coinInfo.description.en || 'No description available.'}
+            <strong>About:</strong> {coinInfo.description.en || 'No description available.'}
           </div>
         </div>
       )}
