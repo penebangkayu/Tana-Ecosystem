@@ -22,14 +22,13 @@ export default function AIPredictionsPage() {
   const [coin, setCoin] = useState('bitcoin')
   const [coins, setCoins] = useState<{ id: string; symbol: string; name: string; image?: string }[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [timeframe, setTimeframe] = useState<string>('1h') // ✅ tetap string, tapi nanti dicocokkan
+  const [timeframe, setTimeframe] = useState<string>('1h')
   const [limit, setLimit] = useState(100)
   const [candles, setCandles] = useState<any[]>([])
   const [analysis, setAnalysis] = useState<string>('')
   const [loadingChart, setLoadingChart] = useState<boolean>(false)
   const [coinSummary, setCoinSummary] = useState<CoinSummary | null>(null)
 
-  // Ambil daftar coin
   useEffect(() => {
     async function fetchCoins() {
       try {
@@ -45,7 +44,6 @@ export default function AIPredictionsPage() {
     fetchCoins()
   }, [])
 
-  // Ambil ringkasan harga coin saat coin berubah
   useEffect(() => {
     async function fetchCoinSummary() {
       if (!coin) return
@@ -78,7 +76,6 @@ export default function AIPredictionsPage() {
     '1y': '365',
   }
 
-  // Fetch OHLC
   useEffect(() => {
     async function fetchCandles() {
       if (!coin) return
@@ -107,7 +104,6 @@ export default function AIPredictionsPage() {
     fetchCandles()
   }, [coin, timeframe, limit])
 
-  // Analisis AI
   async function handleAnalysis() {
     setAnalysis('⏳ Sedang menganalisis...')
     try {
@@ -124,7 +120,6 @@ export default function AIPredictionsPage() {
     }
   }
 
-  // Debounce search
   const [filteredCoins, setFilteredCoins] = useState(coins)
   const handleSearch = debounce((term: string) => {
     if (!term) {
@@ -147,7 +142,7 @@ export default function AIPredictionsPage() {
     const parts = text.split(regex)
     return parts.map((part, i) =>
       regex.test(part) ? (
-        <span key={i} className="bg-yellow-200 dark:bg-yellow-600 font-semibold">
+        <span key={i} className="bg-[#603abd]/20 text-[#603abd] font-semibold">
           {part}
         </span>
       ) : (
@@ -157,8 +152,8 @@ export default function AIPredictionsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Crypto Predictions</h1>
+    <div className="min-h-screen bg-[#181818] text-white px-6 py-8 space-y-6">
+      <h1 className="text-3xl font-semibold text-white">AI Crypto Predictions</h1>
 
       {/* Search + Controls */}
       <div className="flex flex-wrap gap-4 items-center relative">
@@ -168,22 +163,22 @@ export default function AIPredictionsPage() {
             placeholder="Search coin..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white w-full sm:w-64"
+            className="border border-[#603abd] p-2 rounded bg-[#181818] text-white w-full sm:w-64 focus:ring-2 focus:ring-[#603abd]"
           />
           {searchTerm && filteredCoins.length > 0 && (
-            <ul className="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow max-h-64 overflow-y-auto">
+            <ul className="absolute z-50 top-full mt-1 left-0 w-full bg-[#181818] border border-[#603abd] rounded shadow max-h-64 overflow-y-auto">
               {filteredCoins.slice(0, 10).map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center gap-2 p-2 hover:bg-[#2a2a2a] cursor-pointer"
                   onClick={() => {
                     setCoin(c.id)
                     setSearchTerm('')
                   }}
                 >
                   {c.image && <Image src={c.image} alt={c.name} width={20} height={20} />}
-                  <span className="font-medium">{highlightText(c.symbol.toUpperCase(), searchTerm)}</span> -{' '}
-                  <span>{highlightText(c.name, searchTerm)}</span>
+                  <span className="font-medium text-white">{highlightText(c.symbol.toUpperCase(), searchTerm)}</span> -{' '}
+                  <span className="text-gray-300">{highlightText(c.name, searchTerm)}</span>
                 </li>
               ))}
             </ul>
@@ -193,20 +188,20 @@ export default function AIPredictionsPage() {
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
-          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white w-full sm:w-auto"
+          className="border border-[#603abd] p-2 rounded bg-[#181818] text-white w-full sm:w-auto"
         >
-          <option value="5m">5 Menit</option>
-          <option value="15m">15 Menit</option>
-          <option value="1h">1 Jam</option>
-          <option value="4h">4 Jam</option>
-          <option value="1d">1 Hari</option>
-          <option value="1y">1 Tahun</option>
+          <option value="5m">5 Minutes</option>
+          <option value="15m">15 Minutes</option>
+          <option value="1h">1 Hour</option>
+          <option value="4h">4 Hours</option>
+          <option value="1d">1 Day</option>
+          <option value="1y">1 Year</option>
         </select>
 
         <select
           value={limit}
           onChange={(e) => setLimit(Number(e.target.value))}
-          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white w-full sm:w-auto"
+          className="border border-[#603abd] p-2 rounded bg-[#181818] text-white w-full sm:w-auto"
         >
           {[100, 200, 300, 400, 500, 1000].map((val) => (
             <option key={val} value={val}>
@@ -216,35 +211,34 @@ export default function AIPredictionsPage() {
         </select>
       </div>
 
-      {/* Coin Summary */}
       {coinSummary && (
-        <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-4 rounded shadow mt-4">
+        <div className="flex flex-col md:flex-row justify-between items-center border border-[#603abd] bg-[#1f1f1f] p-4 rounded-lg mt-4">
           <div className="flex items-center gap-3">
             <Image src={coinSummary.image} alt={coinSummary.name} width={40} height={40} className="rounded-full" />
             <div className="flex flex-col">
-              <span className="font-bold text-gray-900 dark:text-gray-100">{coinSummary.name}</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 uppercase">{coinSummary.symbol}</span>
+              <span className="font-semibold text-white">{coinSummary.name}</span>
+              <span className="text-sm text-gray-400 uppercase">{coinSummary.symbol}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 mt-3 md:mt-0 text-sm text-gray-700 dark:text-gray-300">
-            <div className="px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+          <div className="flex flex-wrap gap-3 mt-3 md:mt-0 text-sm">
+            <div className="px-3 py-2 border border-[#603abd] rounded-lg text-white">
               Last: IDR {coinSummary.current_price.toLocaleString('id-ID')}
             </div>
-            <div className="px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="px-3 py-2 border border-[#603abd] rounded-lg text-white">
               Low: IDR {coinSummary.low_24h.toLocaleString('id-ID')}
             </div>
-            <div className="px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="px-3 py-2 border border-[#603abd] rounded-lg text-white">
               High: IDR {coinSummary.high_24h.toLocaleString('id-ID')}
             </div>
-            <div className="px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="px-3 py-2 border border-[#603abd] rounded-lg text-white">
               MC: IDR {coinSummary.market_cap.toLocaleString('id-ID')}
             </div>
             <div
-              className={`px-3 py-2 border rounded-lg flex items-center gap-1 ${
+              className={`px-3 py-2 border border-[#603abd] rounded-lg ${
                 coinSummary.price_change_percentage_24h >= 0
-                  ? 'bg-green-50 border-green-400 text-green-700 dark:bg-green-900 dark:text-green-200'
-                  : 'bg-red-50 border-red-400 text-red-700 dark:bg-red-900 dark:text-red-200'
+                  ? 'text-green-400'
+                  : 'text-red-400'
               }`}
             >
               {coinSummary.price_change_percentage_24h >= 0 ? '▲' : '▼'}{' '}
@@ -255,34 +249,33 @@ export default function AIPredictionsPage() {
       )}
 
       {/* Chart + Analysis */}
-      <div className="flex flex-col md:flex-row gap-4 mt-4 relative">
-        <div className="flex-1 border rounded p-4 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-x-auto relative">
+      <div className="flex flex-col md:flex-row gap-4 mt-4">
+        <div className="flex-1 border border-[#603abd] rounded-lg p-4 bg-[#1f1f1f] relative overflow-x-auto">
           {loadingChart && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-gray-900/70 z-10">
-              <div className="loader border-4 border-t-blue-500 border-gray-200 rounded-full w-12 h-12 animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-10">
+              <div className="loader border-4 border-t-[#603abd] border-gray-700 rounded-full w-12 h-12 animate-spin"></div>
             </div>
           )}
-          {/* ✅ Casting aman ke tipe union yang diterima oleh CoinChart */}
           <CoinChart coinId={coin} vsCurrency="idr" timeframe={timeframe as '1D' | '7D' | '30D' | '1Y'} />
         </div>
 
-        <div className="flex-1 border rounded p-4 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 flex flex-col justify-between">
+        <div className="flex-1 border border-[#603abd] rounded-lg p-4 bg-[#1f1f1f] text-white flex flex-col justify-between">
           <div>
-            <h2 className="font-semibold mb-2">📊 Hasil Analisis AI:</h2>
-            <p className="whitespace-pre-line">{analysis}</p>
+            <h2 className="font-semibold mb-2 text-white">📊 AI Analysis Result:</h2>
+            <p className="whitespace-pre-line text-gray-300">{analysis}</p>
           </div>
           <button
             onClick={handleAnalysis}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mt-4 self-start"
+            className="border border-[#603abd] text-white px-4 py-2 rounded-lg hover:bg-[#603abd]/20 transition mt-4 self-start"
           >
-            Analisis AI
+            Analyze with AI
           </button>
         </div>
       </div>
 
       <style jsx>{`
         .loader {
-          border-top-color: #3b82f6;
+          border-top-color: #603abd;
           animation: spin 1s linear infinite;
         }
       `}</style>

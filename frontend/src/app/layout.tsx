@@ -16,13 +16,13 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="dark"> {/* Tambahkan class dark */}
+      <body className="bg-black text-white min-h-screen flex flex-col">
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
             <WalletProvider>
               <Header />
-              <main>{children}</main>
+              <main className="flex-1">{children}</main>
               <Footer />
             </WalletProvider>
           </SessionProvider>

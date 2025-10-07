@@ -60,36 +60,40 @@ export default function TrendingCarousel() {
 
   if (trending.length === 0) {
     return (
-      <div className="w-full py-4 px-2 bg-white dark:bg-gray-900">
-        <p className="text-gray-500 dark:text-gray-400">Loading trending coins...</p>
+      <div className="w-full py-4 px-2 bg-[#181818]">
+        <p className="text-gray-400">Loading trending coins...</p>
       </div>
     )
   }
 
   return (
-    <div className="w-full py-6 px-2 bg-white dark:bg-gray-900">
-      <h3 className="text-gray-800 dark:text-gray-100 font-semibold mb-2">🔥 Trending</h3>
+    <div className="w-full py-6 px-2 bg-[#181818] text-white font-poppins">
+      <h3 className="text-white mb-3">🔥 Trending</h3>
       <div
         ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 py-2"
+        className="flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-[#2a2a2a] py-2"
       >
         {trending.map((coin) => (
           <div
             key={coin.id}
-            className="flex-shrink-0 w-52 cursor-pointer border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition"
+            className="flex-shrink-0 w-52 cursor-pointer border border-white/30 rounded-xl p-4 hover:border-white transition"
             onClick={() => router.push(`/coin/${coin.id}`)}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Image src={coin.image} alt={coin.name} width={36} height={36} className="rounded-full" />
+              <Image
+                src={coin.image}
+                alt={coin.name}
+                width={36}
+                height={36}
+                className="rounded-full"
+              />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{coin.name}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{coin.symbol}</span>
+                <span className="text-sm">{coin.name}</span>
+                <span className="text-xs text-gray-400 uppercase">{coin.symbol}</span>
               </div>
             </div>
             <div className="flex justify-between items-center text-sm font-medium">
-              <span className="text-gray-800 dark:text-gray-100">
-                IDR {coin.current_price.toLocaleString('id-ID')}
-              </span>
+              <span>IDR {coin.current_price.toLocaleString('id-ID')}</span>
               <span
                 className={clsx(
                   coin.price_change_percentage_24h > 0 ? 'text-green-500' : 'text-red-500'

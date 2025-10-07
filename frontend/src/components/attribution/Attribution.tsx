@@ -5,10 +5,10 @@ import { Brain } from "lucide-react"
 
 export default function Attribution() {
   return (
-    <div className="w-full flex flex-col items-center justify-center py-8 space-y-8 bg-gray-50 dark:bg-gray-900">
+    <div className="w-full flex flex-col items-center justify-center py-8 space-y-8 bg-[#181818] font-[Poppins] text-white">
       {/* Data powered by */}
-      <div className="w-full max-w-7xl p-6 border border-gray-300 rounded-xl bg-white flex flex-col items-center">
-        <p className="text-gray-500 text-sm mb-3">
+      <div className="w-full max-w-7xl p-6 border border-[#603abd] rounded-xl bg-white flex flex-col items-center shadow-sm">
+        <p className="text-black text-sm mb-3">
           Data powered by
         </p>
         <div className="flex gap-4 items-center justify-center">
@@ -30,8 +30,8 @@ export default function Attribution() {
       </div>
 
       {/* News powered by */}
-      <div className="w-full max-w-7xl p-6 border border-gray-300 rounded-xl bg-white flex flex-col items-center">
-        <p className="text-gray-500 text-sm mb-3">
+      <div className="w-full max-w-7xl p-6 border border-[#603abd] rounded-xl bg-white flex flex-col items-center shadow-sm">
+        <p className="text-black text-sm mb-3">
           News powered by
         </p>
         <div className="flex gap-6 flex-wrap items-center justify-center">
@@ -113,13 +113,13 @@ export default function Attribution() {
       </div>
 
       {/* Analysis powered by */}
-      <div className="w-full max-w-7xl p-6 border border-gray-300 rounded-xl bg-white flex flex-col items-center">
-        <p className="text-gray-500 text-sm mb-3">
+      <div className="w-full max-w-7xl p-6 border border-[#603abd] rounded-xl bg-white flex flex-col items-center shadow-sm">
+        <p className="text-black text-sm mb-3">
           Analysis powered by
         </p>
         <div className="flex items-center gap-2">
-          <Brain className="w-6 h-6 text-blue-500 hover:animate-shake transition" />
-          <span className="text-black font-bold text-sm">
+          <Brain className="w-6 h-6 text-[#603abd] hover:animate-shake transition" />
+          <span className="text-black font-semibold text-sm">
             Gemini, a Google AI model
           </span>
         </div>

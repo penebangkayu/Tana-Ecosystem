@@ -2,87 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import font Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* -------------------- Global Reset -------------------- */
 html, body {
   padding: 0;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
+  background-color: #181818; /* tetap hitam pekat */
+  color: #ffffff; /* teks utama putih */
+  overflow-x: hidden;
 }
 
+/* Pastikan semua section/footer juga hitam */
+body > * {
+  background-color: #181818;
+}
+
+/* Hilangkan light mode sepenuhnya */
+html {
+  color-scheme: dark;
+}
+
+/* Link default */
 a {
   color: inherit;
   text-decoration: none;
 }
 
+/* Box sizing */
 * {
   box-sizing: border-box;
 }
 
-/* Default light mode colors */
-body {
-  background-color: #ffffff; /* PUTIH MURNI */
-  color: #111827;
+/* Warna aksen ungu khusus */
+.text-accent {
+  color: #603abd;
 }
 
-/* Dark mode override */
-html.dark body {
-  background-color: #111827;
-  color: #f7f9fa;
-}
-
-/* Universe Background */
+/* -------------------- Universe Background -------------------- */
 .universe-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
-  background: linear-gradient(180deg, #ffffff 0%, #e6f0ff 100%); /* Light mode: white to light blue */
+  z-index: -2; /* paling belakang */
   overflow: hidden;
+  background-color: #181818; /* full dark */
 }
 
-html.dark .universe-bg {
-  background: linear-gradient(180deg, #111827 0%, #1e3a8a 100%); /* Dark mode: dark gray to deep blue */
-}
-
-/* Stars */
+/* Stars (bintang) */
 .universe-bg::before {
   content: '';
   position: absolute;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.9) 1px,
-    transparent 1px
-  ),
-  radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.7) 1px,
-    transparent 1px
-  );
-  background-size: 50px 50px, 60px 60px;
-  background-position: 0 0, 30px 30px;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px),
+    radial-gradient(circle, rgba(96,58,189,0.9) 1px, transparent 1px),
+    radial-gradient(circle, rgba(147,122,255,0.6) 1px, transparent 1px);
+  background-size: 50px 50px, 60px 60px, 55px 55px, 65px 65px;
+  background-position: 0 0, 30px 30px, 15px 40px, 50px 10px;
   animation: twinkle 4s infinite ease-in-out;
 }
 
-/* Particles (cosmic dust/meteors) */
+/* Particles (debu kosmik) */
 .universe-bg::after {
   content: '';
   position: absolute;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 200, 0.5) 1px,
-    transparent 1px
-  );
-  background-size: 100px 100px;
-  background-position: 20px 20px;
+  background:
+    radial-gradient(circle, rgba(255,255,200,0.4) 1px, transparent 1px),
+    radial-gradient(circle, rgba(147,122,255,0.3) 1px, transparent 1px);
+  background-size: 100px 100px, 120px 120px;
+  background-position: 20px 20px, 60px 40px;
   animation: move-particles 20s linear infinite;
 }
 
-/* Overlay for readability */
+/* Overlay agar teks tetap terbaca */
 .universe-bg-overlay {
   position: fixed;
   top: 0;
@@ -90,111 +91,29 @@ html.dark .universe-bg {
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%); /* Light mode */
+  background: rgba(24, 24, 24, 0.2);
   pointer-events: none;
 }
 
-html.dark .universe-bg-overlay {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%); /* Dark mode */
-}
-
 /* -------------------- Animasi -------------------- */
+@keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);} }
+.animate-float { animation: float 3s ease-in-out infinite; }
 
-/* Naik-turun halus */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
+@keyframes shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}50%{transform:translateX(3px);}75%{transform:translateX(-3px);} }
+.animate-shake { animation: shake 1.5s ease-in-out infinite; }
 
-/* Goyang kiri-kanan */
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-3px);
-  }
-  50% {
-    transform: translateX(3px);
-  }
-  75% {
-    transform: translateX(-3px);
-  }
-}
-.animate-shake {
-  animation: shake 1.5s ease-in-out infinite;
-}
+@keyframes gradient { 0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;} }
+.animate-gradient { background: linear-gradient(45deg,#603abd,#8b5cf6,#c084fc,#603abd); background-size: 200% 200%; animation: gradient 3s ease infinite; }
 
-/* Animasi gradient untuk tombol hover */
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.animate-gradient {
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
-  background-size: 200% 200%;
-  animation: gradient 3s ease infinite;
-}
+@keyframes fade-in { from { opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+.animate-fade-in { animation: fade-in 0.5s ease-out; }
 
-/* Animasi fade-in untuk teks dan logo */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
-}
+@keyframes twinkle { 0%,100%{opacity:0.8;}50%{opacity:0.4;} }
 
-/* Animasi untuk bintang */
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
+@keyframes move-particles { 0%{transform:translate(0,0);}100%{transform:translate(-100px,-100px);} }
 
-/* Animasi untuk partikel (debu kosmik) */
-@keyframes move-particles {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(-100px, -100px);
-  }
-}
-{`/* ... (kode sebelumnya tetap sama) ... */
-
-/* Border Gradien untuk Swap Interface */
 .border-gradient {
   border: 2px solid transparent;
-  background: linear-gradient(white, white) padding-box, linear-gradient(to right, #3b82f6, #8b5cf6) border-box;
-}
-
-html.dark .border-gradient {
-  background: linear-gradient(#111827, #111827) padding-box, linear-gradient(to right, #3b82f6, #8b5cf6) border-box;
-}
-
-/* ... (kode animasi dan lainnya tetap sama) ... */
+  background: linear-gradient(#181818,#181818) padding-box,
+              linear-gradient(to right,#603abd,#8b5cf6) border-box;
 }

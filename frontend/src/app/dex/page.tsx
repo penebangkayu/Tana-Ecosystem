@@ -147,39 +147,40 @@ export default function DexPage() {
     }
   }
 
-  // Background stars animation
+  // Animated background with white and purple stars
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let width = canvas.width = window.innerWidth
-    let height = canvas.height = window.innerHeight
+    let width = (canvas.width = window.innerWidth)
+    let height = (canvas.height = window.innerHeight)
 
+    // stars: random white or purple
     const stars = Array.from({ length: 150 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      radius: Math.random() * 1.2,
-      speed: Math.random() * 0.5 + 0.2
+      radius: Math.random() * 1.3,
+      speed: Math.random() * 0.4 + 0.2,
+      color: Math.random() < 0.8 ? '#603abd' : '#ffffff', // 20% purple, 80% white
     }))
 
     const animate = () => {
-      ctx.fillStyle = 'black'
+      ctx.fillStyle = '#181818'
       ctx.fillRect(0, 0, width, height)
-      ctx.fillStyle = 'white'
-      stars.forEach(star => {
+      stars.forEach((star) => {
         star.y -= star.speed
         if (star.y < 0) star.y = height
         ctx.beginPath()
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
+        ctx.fillStyle = star.color
         ctx.fill()
       })
       requestAnimationFrame(animate)
     }
 
     animate()
-
     const handleResize = () => {
       width = canvas.width = window.innerWidth
       height = canvas.height = window.innerHeight
@@ -189,71 +190,74 @@ export default function DexPage() {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
+    <div className="relative min-h-screen overflow-hidden bg-[#181818] text-gray-100 font-[Poppins]">
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />
 
-      <div className="relative z-10 max-w-3xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-4 text-center text-gray-100">
-          Tana Ecosystem DEX
+      <div className="relative z-10 max-w-3xl mx-auto p-8 sm:p-12 backdrop-blur-md bg-[#1f1f1f]/80 border border-[#2b2b2b] rounded-2xl shadow-lg mt-16">
+        <h1 className="text-4xl font-bold mb-4 text-center">
+          <span className="text-[#603abd]">Tana</span> DEX
         </h1>
 
-        <p className="text-center text-gray-300 mb-6">
-          Swap your tokens directly on the DEX safely and instantly. All transactions are executed on-chain, ensuring maximum security.
+        {/* Keterangan swap aman */}
+        <p className="text-center text-gray-300 mb-8">
+          Swap tokens instantly and securely <span className="text-[#603abd] font-medium">directly from here</span>.
         </p>
 
         {errorMessage && (
-          <p className="bg-red-100 text-red-700 p-2 rounded mb-4">{errorMessage}</p>
+          <p className="bg-red-900 text-red-200 p-2 rounded mb-4 border border-red-700 text-center">
+            {errorMessage}
+          </p>
         )}
 
-        <form 
-          onSubmit={handleSwap} 
-          className="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 p-6 rounded-3xl shadow-2xl text-gray-100 border border-gray-700"
+        <form
+          onSubmit={handleSwap}
+          className="space-y-4"
         >
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-300 mb-1">From</label>
             <select
-              className="w-full border rounded p-2 bg-gray-800 text-white"
+              className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-[#2b2b2b] text-gray-100 focus:border-[#603abd] focus:ring-[#603abd] outline-none transition-all"
               value={tokenIn}
-              onChange={e => setTokenIn(e.target.value)}
+              onChange={(e) => setTokenIn(e.target.value)}
             >
-              {tokenList.map(t => (
+              {tokenList.map((t) => (
                 <option key={t.symbol}>{t.symbol}</option>
               ))}
             </select>
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-300 mb-1">To</label>
             <select
-              className="w-full border rounded p-2 bg-gray-800 text-white"
+              className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-[#2b2b2b] text-gray-100 focus:border-[#603abd] focus:ring-[#603abd] outline-none transition-all"
               value={tokenOut}
-              onChange={e => setTokenOut(e.target.value)}
+              onChange={(e) => setTokenOut(e.target.value)}
             >
-              {tokenList.map(t => (
+              {tokenList.map((t) => (
                 <option key={t.symbol}>{t.symbol}</option>
               ))}
             </select>
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-300 mb-1">Amount</label>
             <input
               type="number"
               value={swapAmount}
-              onChange={e => setSwapAmount(e.target.value)}
-              className="w-full border rounded p-2 bg-gray-800 text-white"
+              onChange={(e) => setSwapAmount(e.target.value)}
+              className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-[#2b2b2b] text-gray-100 focus:border-[#603abd] focus:ring-[#603abd] outline-none transition-all"
               placeholder="0.0"
             />
           </div>
 
-          <p className="text-sm text-gray-300 mb-4">
-            Estimated Output: {estimatedOutput} {tokenOut}
+          <p className="text-sm text-gray-400 mb-4">
+            Estimated Output: <span className="text-[#603abd]">{estimatedOutput}</span> {tokenOut}
           </p>
 
           <button
             type="submit"
             disabled={isSwapping}
-            className="w-full py-2 rounded bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold hover:opacity-90"
+            className="w-full py-3 rounded-lg font-semibold bg-gradient-to-r from-[#603abd] to-[#7e5bef] hover:opacity-90 transition-all disabled:opacity-60"
           >
             {isSwapping ? 'Swapping...' : 'Swap'}
           </button>
@@ -262,7 +266,7 @@ export default function DexPage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => setSwapDex(swapDex === 'uniswap' ? 'pancakeswap' : 'uniswap')}
-            className="text-sm text-blue-400 underline"
+            className="text-sm text-[#603abd] hover:underline transition-all"
           >
             Switch to {swapDex === 'uniswap' ? 'PancakeSwap' : 'Uniswap'}
           </button>

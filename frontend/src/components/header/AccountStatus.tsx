@@ -23,15 +23,15 @@ export function AccountStatus({ handleAccountLogout }: AccountStatusProps) {
                         alt="avatar"
                         width={32}
                         height={32}
-                        className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600"
+                        className="w-8 h-8 rounded-full border border-[#603abd]"
                     />
                 )}
-                <span className="text-sm text-gray-700 dark:text-gray-300 hidden lg:inline">
+                <span className="text-sm text-gray-100 hidden lg:inline">
                     Hi, {displayName.length > 10 ? displayName.slice(0, 10) + '...' : displayName}
                 </span>
                 <button
                     onClick={handleAccountLogout}
-                    className="px-3 py-1 border border-gray-400 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                    className="px-3 py-1 rounded-lg border border-[#603abd] text-white hover:bg-[#603abd] hover:text-white text-sm font-semibold transition-colors duration-200"
                 >
                     Logout
                 </button>
@@ -43,7 +43,7 @@ export function AccountStatus({ handleAccountLogout }: AccountStatusProps) {
     return (
         <Link 
             href="/auth/login"
-            className="px-3 py-1 border border-green-500 text-green-500 dark:text-green-400 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30 text-sm font-semibold transition-colors duration-200"
+            className="px-3 py-1 rounded-lg border border-[#603abd] text-white hover:bg-[#603abd] hover:text-white text-sm font-semibold transition-colors duration-200"
         >
             Login/Register
         </Link>

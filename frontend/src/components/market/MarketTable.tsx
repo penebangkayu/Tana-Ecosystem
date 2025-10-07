@@ -38,11 +38,6 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
         `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${pair.toLowerCase()}&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h`
       )
       const data = await res.json()
-      // Log sparkline data for debugging
-      console.log('Top coins data:', data.map((coin: Coin) => ({
-        id: coin.id,
-        sparkline: coin.sparkline_in_7d?.price?.length || 'No sparkline data'
-      })))
       setCoins(data)
       setAllCoins(data)
       setLoading(false)
@@ -58,7 +53,6 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
       return
     }
 
-    // Client-side filter
     const filtered = allCoins.filter(
       (coin) =>
         coin.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -70,7 +64,6 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
       return
     }
 
-    // Fallback API fetch
     try {
       setLoading(true)
       const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${query}`)
@@ -86,12 +79,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
           ','
         )}&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=24h`
       )
-      const marketData = await marketRes.json() // ✅ ganti dari 'res.json()' ke 'marketRes.json()'
-      // Log sparkline data for debugging
-      console.log('Search coins data:', marketData.map((coin: Coin) => ({
-        id: coin.id,
-        sparkline: coin.sparkline_in_7d?.price?.length || 'No sparkline data'
-      })))
+      const marketData = await marketRes.json()
       setCoins(marketData)
       setLoading(false)
     } catch (err) {
@@ -123,12 +111,16 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
     fetchTopCoins()
   }
 
-  // Sparkline chart component
-  const SparklineChart = ({ data, width = 80, height = 30, color }: { 
-    data: number[], 
-    width?: number, 
-    height?: number, 
-    color: string 
+  const SparklineChart = ({
+    data,
+    width = 80,
+    height = 30,
+    color,
+  }: {
+    data: number[]
+    width?: number
+    height?: number
+    color: string
   }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -155,7 +147,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
       const stepX = width / (data.length - 1)
       data.forEach((value, index) => {
         const x = index * stepX
-        const normalizedY = height - ((value - minValue) / range * (height - 2)) - 1
+        const normalizedY = height - ((value - minValue) / range) * (height - 2) - 1
         const y = Math.max(1, Math.min(normalizedY, height - 1))
         if (index === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
@@ -170,7 +162,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
 
     if (!data || data.length < 2) {
       return (
-        <div className="w-[80px] h-[30px] bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-500">
+        <div className="w-[80px] h-[30px] bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">
           No data
         </div>
       )
@@ -183,11 +175,13 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
     )
   }
 
-  if (loading) return <p className="text-gray-500 dark:text-gray-400 px-4">Loading market data...</p>
-  if (coins.length === 0) return <p className="text-gray-500 dark:text-gray-400 px-4">No data found.</p>
+  if (loading)
+    return <p className="text-gray-400 px-4 font-poppins">Loading market data...</p>
+  if (coins.length === 0)
+    return <p className="text-gray-400 px-4 font-poppins">No data found.</p>
 
   return (
-    <div className="flex flex-col space-y-4 w-full">
+    <div className="flex flex-col space-y-4 w-full font-poppins">
       {/* Search Box */}
       <div className="px-4 relative">
         <input
@@ -195,12 +189,12 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
           placeholder="Search coin..."
           value={search}
           onChange={handleSearchChange}
-          className="w-full p-2 pr-10 rounded-full border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          className="w-full p-2 pr-10 rounded-full border border-[#603abd] bg-[#181818] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#603abd] transition"
         />
         {search && (
           <button
             onClick={clearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
           >
             ×
           </button>
@@ -209,53 +203,60 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
 
       {/* Market Table */}
       <div className="overflow-x-auto w-full">
-        <table className="min-w-full table-auto border-collapse text-sm bg-white dark:bg-gray-900">
+        <table className="min-w-full table-auto border-collapse text-sm bg-[#181818] text-white">
           <thead>
-            <tr className="border-b border-gray-300 dark:border-gray-700">
-              <th className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">#</th>
-              <th className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Coin</th>
-              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Price ({pair})</th>
-              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">24h %</th>
-              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Market Cap ({pair})</th>
-              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Volume ({pair})</th>
-              <th className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">7d Chart</th>
+            <tr className="border-b border-white/20">
+              <th className="px-4 py-2 text-left">#</th>
+              <th className="px-4 py-2 text-left">Coin</th>
+              <th className="px-4 py-2 text-right">Price ({pair})</th>
+              <th className="px-4 py-2 text-right">24h %</th>
+              <th className="px-4 py-2 text-right">Market Cap ({pair})</th>
+              <th className="px-4 py-2 text-right">Volume ({pair})</th>
+              <th className="px-4 py-2 text-right">7d Chart</th>
             </tr>
           </thead>
           <tbody>
             {coins.map((coin, index) => (
               <tr
                 key={coin.id}
-                className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-200 dark:border-gray-700"
+                className="hover:bg-[#603abd]/10 cursor-pointer border-b border-white/10 transition"
                 onClick={() => router.push(`/coin/${coin.id}`)}
               >
-                <td className="px-4 py-2 text-gray-900 dark:text-gray-100 font-medium">{index + 1}</td>
+                <td className="px-4 py-2 text-white">{index + 1}</td>
                 <td className="px-4 py-2 flex items-center gap-2">
-                  <Image src={coin.image} alt={coin.name} width={24} height={24} className="rounded-full" />
+                  <Image
+                    src={coin.image}
+                    alt={coin.name}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
                   <div className="flex flex-col">
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{coin.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{coin.symbol}</span>
+                    <span className="text-white">{coin.name}</span>
+                    <span className="text-xs text-gray-400 uppercase">{coin.symbol}</span>
                   </div>
                 </td>
-                <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
+                <td className="px-4 py-2 text-right text-white">
                   IDR {coin.current_price.toLocaleString('id-ID')}
                 </td>
                 <td
                   className={clsx(
                     'px-4 py-2 text-right font-medium flex items-center justify-end gap-1',
-                    coin.price_change_percentage_24h > 0 ? 'text-green-500' : 'text-red-500'
+                    coin.price_change_percentage_24h > 0 ? 'text-green-400' : 'text-red-400'
                   )}
                 >
-                  {coin.price_change_percentage_24h > 0 ? '▲' : '▼'} {coin.price_change_percentage_24h?.toFixed(2)}%
+                  {coin.price_change_percentage_24h > 0 ? '▲' : '▼'}{' '}
+                  {coin.price_change_percentage_24h?.toFixed(2)}%
                 </td>
-                <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
+                <td className="px-4 py-2 text-right text-white">
                   IDR {coin.market_cap.toLocaleString('id-ID')}
                 </td>
-                <td className="px-4 py-2 text-right text-gray-900 dark:text-gray-100">
+                <td className="px-4 py-2 text-right text-white">
                   IDR {coin.total_volume.toLocaleString('id-ID')}
                 </td>
                 <td className="px-4 py-2">
-                  <SparklineChart 
-                    data={coin.sparkline_in_7d?.price || []} 
+                  <SparklineChart
+                    data={coin.sparkline_in_7d?.price || []}
                     color={coin.price_change_percentage_24h > 0 ? '#10b981' : '#ef4444'}
                   />
                 </td>

@@ -12,7 +12,7 @@ import {
 } from 'lightweight-charts'
 
 interface PredictionChartProps {
-  coinId?: string // biar bisa dikasih dari luar, tapi default tetap "bitcoin"
+  coinId?: string
 }
 
 export default function PredictionChart({ coinId: externalCoinId }: PredictionChartProps) {
@@ -21,7 +21,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
   const [coinId, setCoinId] = useState<string>(externalCoinId || 'bitcoin')
   const [coins, setCoins] = useState<{ id: string; name: string }[]>([])
 
-  // Update coinId kalau prop dari luar berubah
   useEffect(() => {
     if (externalCoinId) {
       setCoinId(externalCoinId)
@@ -29,7 +28,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
   }, [externalCoinId])
 
   useEffect(() => {
-    // Ambil daftar koin dari CoinGecko API
     const fetchCoins = async () => {
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/list')
@@ -39,7 +37,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
         console.error('Gagal mengambil daftar koin:', error)
       }
     }
-
     fetchCoins()
   }, [])
 
@@ -47,31 +44,35 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
     if (!chartContainerRef.current) return
     const container = chartContainerRef.current
 
-    // NOTE: beberapa versi typing lightweight-charts ketat terhadap shape opsi.
-    // Kita buat options lalu cast ke any saat memanggil createChart supaya kompatibel.
     const chartOptions: any = {
       width: container.clientWidth,
       height: 400,
       layout: {
-        // gunakan bentuk yang lebih umum, tapi cast ke any saat createChart dipanggil
-        background: { color: '#ffffff' },
-        textColor: '#000000',
+        background: { color: '#181818' },
+        textColor: '#f3f4f6',
       },
       grid: {
-        vertLines: { color: '#eee' },
-        horzLines: { color: '#eee' },
+        vertLines: { color: '#333' },
+        horzLines: { color: '#333' },
       },
       crosshair: { mode: CrosshairMode.Normal },
+      rightPriceScale: { borderColor: '#555' },
+      timeScale: { borderColor: '#555', timeVisible: true },
     }
 
-    // Inisialisasi chart (casting ke any untuk menghindari error typing yang berbeda beda)
     const chart = createChart(container, chartOptions as any)
     chartRef.current = chart
 
-    const candleSeries: ISeriesApi<'Candlestick'> = chart.addCandlestickSeries()
-    const lineSeries: ISeriesApi<'Line'> = chart.addLineSeries({ color: 'red', lineWidth: 2 })
+    const candleSeries: ISeriesApi<'Candlestick'> = chart.addCandlestickSeries({
+      upColor: '#26a69a',
+      downColor: '#ef5350',
+      borderUpColor: '#26a69a',
+      borderDownColor: '#ef5350',
+      wickUpColor: '#26a69a',
+      wickDownColor: '#ef5350',
+    })
+    const lineSeries: ISeriesApi<'Line'> = chart.addLineSeries({ color: '#a885ff', lineWidth: 2 })
 
-    // Ambil data OHLC dan prediksi
     const fetchData = async () => {
       try {
         const res = await fetch(
@@ -80,7 +81,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
         const data: [number, number, number, number, number][] = await res.json()
         if (!data || !Array.isArray(data)) return
 
-        // Pastikan time sesuai dengan UTCTimestamp type (casting aman)
         const candles: CandlestickData<UTCTimestamp>[] = data.map(
           ([time, open, high, low, close]) => ({
             time: Math.floor(time / 1000) as UTCTimestamp,
@@ -92,7 +92,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
         )
         candleSeries.setData(candles)
 
-        // Mock prediksi ±0.5% dari close terakhir
         const last = candles[candles.length - 1]
         if (last) {
           const mock: LineData<UTCTimestamp>[] = Array.from({ length: 20 }, (_, i) => ({
@@ -110,7 +109,6 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
 
     fetchData()
 
-    // Responsif
     const resizeObserver = new ResizeObserver(() => {
       chart.applyOptions({ width: container.clientWidth })
     })
@@ -124,12 +122,11 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
 
   return (
     <div>
-      {/* Dropdown koin (aktif hanya jika tidak dikontrol dari luar) */}
       {!externalCoinId && (
         <div className="mb-4">
-          <label className="mr-2 font-semibold text-gray-800 dark:text-gray-200">Pilih Koin:</label>
+          <label className="mr-2 font-semibold text-gray-200">Pilih Koin:</label>
           <select
-            className="border rounded px-2 py-1"
+            className="border rounded px-2 py-1 bg-[#181818] text-gray-100 border-gray-700"
             value={coinId}
             onChange={(e) => setCoinId(e.target.value)}
           >
@@ -142,8 +139,10 @@ export default function PredictionChart({ coinId: externalCoinId }: PredictionCh
         </div>
       )}
 
-      {/* Kontainer chart */}
-      <div ref={chartContainerRef} className="w-full h-[400px]" />
+      <div
+        ref={chartContainerRef}
+        className="w-full h-[400px] rounded border border-[#181818] bg-[#181818]"
+      />
     </div>
   )
 }

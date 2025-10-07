@@ -4,9 +4,15 @@ module.exports = {
     "./src/app/**/*.{ts,tsx}",
     "./src/components/**/*.{ts,tsx}"
   ],
-  darkMode: 'class', // penting untuk toggle
+  darkMode: 'class', // tetap aktif, biar bisa pakai class="dark"
   theme: {
     extend: {
+      colors: {
+        // Tambahkan warna utama
+        primary: '#603abd', // Ungu utama
+        background: '#000000', // Latar belakang hitam
+        text: '#ffffff', // Teks putih default
+      },
       keyframes: {
         shake: {
           '0%, 100%': { transform: 'translateX(0)' },
@@ -20,5 +26,14 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addBase, theme }) {
+      addBase({
+        'html': { backgroundColor: theme('colors.background') },
+        'body': { color: theme('colors.text') },
+        'a': { color: theme('colors.primary') },
+        'h1, h2, h3, h4, h5, h6': { color: theme('colors.primary') },
+      });
+    },
+  ],
 }
