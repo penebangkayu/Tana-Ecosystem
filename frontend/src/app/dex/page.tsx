@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ethers } from 'ethers'
 import { useWallet } from '../../components/contexts/WalletContext'
 
@@ -37,6 +37,7 @@ export default function DexPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [tokenList, setTokenList] = useState<TokenData[]>([])
   const [poolData, setPoolData] = useState<PoolData | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const dexList = [
     {
@@ -94,7 +95,6 @@ export default function DexPage() {
     },
   ]
 
-  // filter token list berdasarkan DEX
   useEffect(() => {
     const selected = dexList.find(d => d.name.toLowerCase() === swapDex)
     if (selected) {
@@ -102,13 +102,11 @@ export default function DexPage() {
     }
   }, [swapDex])
 
-  // perhitungan dummy estimasi output (tidak error saat build)
   useEffect(() => {
     if (!swapAmount || Number(swapAmount) <= 0) {
       setEstimatedOutput('0.0')
       return
     }
-    // Simulasi konversi harga 1:1 untuk menghindari error build
     const est = (parseFloat(swapAmount) * 0.99).toFixed(4)
     setEstimatedOutput(est)
   }, [swapAmount])
@@ -135,7 +133,6 @@ export default function DexPage() {
       const dex = dexList.find(d => d.name.toLowerCase() === swapDex)
       if (!dex) throw new Error('Invalid DEX')
 
-      // contoh transaksi dummy
       const tx = {
         to: dex.routerAddress,
         value: ethers.parseEther('0'),
@@ -150,22 +147,72 @@ export default function DexPage() {
     }
   }
 
+  // Background stars animation
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let width = canvas.width = window.innerWidth
+    let height = canvas.height = window.innerHeight
+
+    const stars = Array.from({ length: 150 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: Math.random() * 1.2,
+      speed: Math.random() * 0.5 + 0.2
+    }))
+
+    const animate = () => {
+      ctx.fillStyle = 'black'
+      ctx.fillRect(0, 0, width, height)
+      ctx.fillStyle = 'white'
+      stars.forEach(star => {
+        star.y -= star.speed
+        if (star.y < 0) star.y = height
+        ctx.beginPath()
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
+        ctx.fill()
+      })
+      requestAnimationFrame(animate)
+    }
+
+    animate()
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth
+      height = canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
-    <div className="relative min-h-screen">
-      <div className="max-w-3xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />
+
+      <div className="relative z-10 max-w-3xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-4 text-center text-gray-100">
           Tana Ecosystem DEX
         </h1>
+
+        <p className="text-center text-gray-300 mb-6">
+          Swap your tokens directly on the DEX safely and instantly. All transactions are executed on-chain, ensuring maximum security.
+        </p>
 
         {errorMessage && (
           <p className="bg-red-100 text-red-700 p-2 rounded mb-4">{errorMessage}</p>
         )}
 
-        <form onSubmit={handleSwap} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
+        <form 
+          onSubmit={handleSwap} 
+          className="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 p-6 rounded-3xl shadow-2xl text-gray-100 border border-gray-700"
+        >
           <div className="mb-4">
-            <label className="block text-gray-600 dark:text-gray-300 mb-1">From</label>
+            <label className="block text-gray-300 mb-1">From</label>
             <select
-              className="w-full border rounded p-2 bg-gray-50 dark:bg-gray-700 dark:text-white"
+              className="w-full border rounded p-2 bg-gray-800 text-white"
               value={tokenIn}
               onChange={e => setTokenIn(e.target.value)}
             >
@@ -176,9 +223,9 @@ export default function DexPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-600 dark:text-gray-300 mb-1">To</label>
+            <label className="block text-gray-300 mb-1">To</label>
             <select
-              className="w-full border rounded p-2 bg-gray-50 dark:bg-gray-700 dark:text-white"
+              className="w-full border rounded p-2 bg-gray-800 text-white"
               value={tokenOut}
               onChange={e => setTokenOut(e.target.value)}
             >
@@ -189,24 +236,24 @@ export default function DexPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-600 dark:text-gray-300 mb-1">Amount</label>
+            <label className="block text-gray-300 mb-1">Amount</label>
             <input
               type="number"
               value={swapAmount}
               onChange={e => setSwapAmount(e.target.value)}
-              className="w-full border rounded p-2 bg-gray-50 dark:bg-gray-700 dark:text-white"
+              className="w-full border rounded p-2 bg-gray-800 text-white"
               placeholder="0.0"
             />
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-sm text-gray-300 mb-4">
             Estimated Output: {estimatedOutput} {tokenOut}
           </p>
 
           <button
             type="submit"
             disabled={isSwapping}
-            className="w-full py-2 rounded bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:opacity-90"
+            className="w-full py-2 rounded bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold hover:opacity-90"
           >
             {isSwapping ? 'Swapping...' : 'Swap'}
           </button>
@@ -215,7 +262,7 @@ export default function DexPage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => setSwapDex(swapDex === 'uniswap' ? 'pancakeswap' : 'uniswap')}
-            className="text-sm text-blue-600 dark:text-blue-400 underline"
+            className="text-sm text-blue-400 underline"
           >
             Switch to {swapDex === 'uniswap' ? 'PancakeSwap' : 'Uniswap'}
           </button>
