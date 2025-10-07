@@ -5,14 +5,24 @@ import { ethers } from 'ethers';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '../contexts/WalletContext';
 
-export function WalletStatus() {
+// 🔧 Tambahkan props agar kompatibel dengan Header.tsx
+interface WalletStatusProps {
+  handleWalletDisconnect?: () => void;
+}
+
+export function WalletStatus({ handleWalletDisconnect }: WalletStatusProps) {
   const router = useRouter();
   const { walletAddress, setWalletAddress } = useWallet();
   const [loadingWallet, setLoadingWallet] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('WalletStatus mounted, walletAddress:', walletAddress, 'Provider:', !!window.ethereum);
+    console.log(
+      'WalletStatus mounted, walletAddress:',
+      walletAddress,
+      'Provider:',
+      !!window.ethereum
+    );
   }, [walletAddress]);
 
   const handleWalletConnect = async () => {
@@ -29,7 +39,7 @@ export function WalletStatus() {
       const address = accounts[0];
       setWalletAddress(address);
       console.log('Wallet connected:', address);
-      router.push('/dex'); // Redirect ke halaman DEX setelah connect
+      router.push('/dex'); // ✅ Tetap sama: redirect ke DEX
     } catch (err: any) {
       console.error('Wallet connect error:', err);
       setError('Failed to connect.');
@@ -38,19 +48,20 @@ export function WalletStatus() {
     }
   };
 
-  const handleWalletDisconnect = () => {
+  const handleDisconnectClick = () => {
     setWalletAddress(null);
     console.log('Wallet disconnected');
-    router.push('/'); // Redirect ke halaman utama saat disconnect
+    router.push('/'); // ✅ Tetap sama: redirect ke homepage
+    if (handleWalletDisconnect) handleWalletDisconnect(); // 🔧 Tambahan agar bisa trigger fungsi parent
   };
 
   return (
     <div className="w-full max-w-xs">
       <div className="border border-gray-300 dark:border-gray-600 rounded-2xl shadow-md p-3 bg-white dark:bg-gray-800">
         <button
-          onClick={walletAddress ? handleWalletDisconnect : handleWalletConnect}
+          onClick={walletAddress ? handleDisconnectClick : handleWalletConnect}
           disabled={loadingWallet}
-          className={`w-full text-center text-sm font-bold text-black dark:text-white disabled:text-gray-400 disabled:cursor-not-allowed transition-colors`}
+          className="w-full text-center text-sm font-bold text-black dark:text-white disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           {loadingWallet
             ? 'Connecting...'
@@ -58,7 +69,9 @@ export function WalletStatus() {
             ? `Disconnect (${walletAddress.substring(0, 6)}...${walletAddress.slice(-4)})`
             : 'Connect Wallet'}
         </button>
-        {error && <p className="text-xs text-red-500 mt-1 text-center">{error}</p>}
+        {error && (
+          <p className="text-xs text-red-500 mt-1 text-center">{error}</p>
+        )}
       </div>
     </div>
   );

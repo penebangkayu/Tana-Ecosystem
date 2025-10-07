@@ -1,7 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createChart, CrosshairMode, ISeriesApi } from 'lightweight-charts'
+import {
+  createChart,
+  CrosshairMode,
+  ISeriesApi,
+  UTCTimestamp,
+} from 'lightweight-charts'
 
 interface CoinChartProps {
   coinId: string
@@ -22,19 +27,23 @@ interface CoinInfo {
     repos_url?: { github: string[] }
   }
   image: { small: string; thumb: string; large: string }
-  market_data: {
-    current_price: Record<string, number>
-  }
+  market_data: { current_price: Record<string, number> }
 }
 
-export default function CoinChart({ coinId, vsCurrency = 'idr', timeframe = '30D' }: CoinChartProps) {
+export default function CoinChart({
+  coinId,
+  vsCurrency = 'idr',
+  timeframe = '30D',
+}: CoinChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null)
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null)
 
   const [isDarkMode, setIsDarkMode] = useState(
-    typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
+    typeof window !== 'undefined' &&
+      document.documentElement.classList.contains('dark')
   )
+
   const [coinInfo, setCoinInfo] = useState<CoinInfo | null>(null)
 
   // Mapping timeframe ke Coingecko
@@ -63,13 +72,16 @@ export default function CoinChart({ coinId, vsCurrency = 'idr', timeframe = '30D
       )
       if (!res.ok) throw new Error('Failed to fetch OHLC')
       const data: [number, number, number, number, number][] = await res.json()
+
+      // Cast time ke UTCTimestamp agar cocok dengan type baru
       const candleData = data.map(d => ({
-        time: Math.floor(d[0] / 1000),
+        time: (Math.floor(d[0] / 1000) as UTCTimestamp),
         open: d[1],
         high: d[2],
         low: d[3],
         close: d[4],
       }))
+
       candleSeriesRef.current.setData(candleData)
     } catch (err) {
       console.error('OHLC error:', err)
@@ -186,10 +198,13 @@ export default function CoinChart({ coinId, vsCurrency = 'idr', timeframe = '30D
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
             <strong>Blockchain / Platform:</strong>{' '}
-            {Object.keys(coinInfo.platforms).filter(k => coinInfo.platforms[k]).join(', ') || 'N/A'}
+            {Object.keys(coinInfo.platforms)
+              .filter(k => coinInfo.platforms[k])
+              .join(', ') || 'N/A'}
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-            <strong>Website:</strong> {coinInfo.links.homepage.filter(Boolean).join(', ') || 'N/A'}
+            <strong>Website:</strong>{' '}
+            {coinInfo.links.homepage.filter(Boolean).join(', ') || 'N/A'}
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
             <strong>About:</strong> {coinInfo.description.en || 'No description available.'}

@@ -27,7 +27,14 @@ export default function DashboardPage() {
       <section className="border-b border-gray-200 dark:border-gray-700 pb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Markets</h2>
-          <MarketTable pair="IDR" onCoinSelect={setSelectedCoin} />
+          
+          {/* ✅ Hilangkan onCoinSelect karena tidak ada di MarketTable */}
+          <MarketTable pair="IDR" />
+
+          {/* ✅ Tambah placeholder untuk memilih coin */}
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Click a coin in the table to view its chart and predictions.
+          </div>
         </div>
       </section>
 
@@ -93,14 +100,12 @@ export default function DashboardPage() {
                 Access our automated trade engine to simulate strategies and execute trades.
               </p>
               {isAuthenticated ? (
-                <>
-                  <Link
-                    href="/trade-engine"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  >
-                    Open Trade Engine
-                  </Link>
-                </>
+                <Link
+                  href="/trade-engine"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Open Trade Engine
+                </Link>
               ) : (
                 <div className="text-center">
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -126,7 +131,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Attribution (at the bottom, above footer) */}
+      {/* Attribution */}
       <section className="border-b border-gray-200 dark:border-gray-700 pb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <Attribution />

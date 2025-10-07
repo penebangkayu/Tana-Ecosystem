@@ -86,7 +86,7 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
           ','
         )}&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=24h`
       )
-      const marketData = await res.json()
+      const marketData = await marketRes.json() // ✅ ganti dari 'res.json()' ke 'marketRes.json()'
       // Log sparkline data for debugging
       console.log('Search coins data:', marketData.map((coin: Coin) => ({
         id: coin.id,
@@ -134,30 +134,19 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
 
     useEffect(() => {
       const canvas = canvasRef.current
-      if (!canvas || !data || data.length < 2) {
-        console.log('No valid data for sparkline chart:', data)
-        return
-      }
+      if (!canvas || !data || data.length < 2) return
 
       const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        console.error('Canvas context not available')
-        return
-      }
+      if (!ctx) return
 
-      // Set explicit canvas dimensions
       canvas.width = width
       canvas.height = height
-
-      // Clear canvas
       ctx.clearRect(0, 0, width, height)
 
-      // Find min and max values for scaling
       const minValue = Math.min(...data)
       const maxValue = Math.max(...data)
-      const range = maxValue - minValue || 1 // Prevent division by zero
+      const range = maxValue - minValue || 1
 
-      // Draw line
       ctx.beginPath()
       ctx.strokeStyle = color
       ctx.lineWidth = 1.5
@@ -168,20 +157,14 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
         const x = index * stepX
         const normalizedY = height - ((value - minValue) / range * (height - 2)) - 1
         const y = Math.max(1, Math.min(normalizedY, height - 1))
-
-        if (index === 0) {
-          ctx.moveTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-        }
+        if (index === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
       })
-
       ctx.stroke()
 
-      // Add fill below the line
       ctx.lineTo(width, height)
       ctx.lineTo(0, height)
-      ctx.fillStyle = `${color}20` // 12.5% opacity
+      ctx.fillStyle = `${color}20`
       ctx.fill()
     }, [data, width, height, color])
 
