@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "preserve",
+    "jsx": "preserve", // ← ubah dari "preserve" ke "react-jsx"
     "module": "ESNext",
     "moduleResolution": "Node",
     "target": "ES6",

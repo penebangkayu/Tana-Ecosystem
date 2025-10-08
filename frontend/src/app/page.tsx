@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import MarketTable from "@/components/market/MarketTable"
@@ -188,7 +189,7 @@ export default function DashboardPage() {
     { icon: <FaUsers className="w-6 h-6 text-[#603abd]" />, text: "Multi Wallet" },
   ]
 
-  const renderFeatureIcons = (features: {icon: JSX.Element, text: string}[]) => (
+  const renderFeatureIcons = (features: {icon: React.ReactNode, text: string}[]) => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2 text-center">
       {features.map((f, idx) => (
         <motion.div key={idx} className="flex flex-col items-center justify-center p-3 border-2 border-[#603abd] rounded-xl hover:shadow-lg transition-all"
