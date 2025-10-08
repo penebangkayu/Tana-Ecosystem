@@ -59,7 +59,7 @@ export default function CoinPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 bg-[#181818] text-white">
+    <div className="space-y-6 bg-[#181818] text-white font-poppins px-2 sm:px-4 md:px-6">
       {/* Button kembali */}
       <button
         onClick={() => router.push('/')}
@@ -71,7 +71,7 @@ export default function CoinPage() {
 
       {/* Chart Header */}
       {coinSummary && (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#202020] border border-gray-700 p-4 rounded shadow">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#202020] border border-gray-700 p-4 rounded shadow w-full">
           {/* Kiri: Logo + Nama */}
           <div className="flex items-center gap-3 mb-4 md:mb-0 w-full md:w-auto">
             <Image src={coinSummary.image} alt={coinSummary.name} width={40} height={40} className="rounded-full" />
@@ -128,8 +128,8 @@ export default function CoinPage() {
 
       {/* NewsList Section */}
       <section className="w-full bg-[#202020] border-t border-b border-gray-700 shadow">
-        <div className="max-w-4xl w-full mx-0 px-6">
-          <h2 className="text-xl font-bold mb-4 text-white">Related News</h2>
+        <div className="w-full mx-0 px-0 sm:px-2 md:px-4">
+          <h2 className="text-xl font-bold mb-4 text-white px-2 sm:px-0">Related News</h2>
           <div className="w-full">
             <CoinNews />
           </div>

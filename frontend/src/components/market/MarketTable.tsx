@@ -21,9 +21,10 @@ interface Coin {
 
 interface MarketTableProps {
   pair?: string
+  stickyLogo?: boolean
 }
 
-export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
+export default function MarketTable({ pair = 'IDR', stickyLogo = false }: MarketTableProps) {
   const [coins, setCoins] = useState<Coin[]>([])
   const [allCoins, setAllCoins] = useState<Coin[]>([])
   const [search, setSearch] = useState('')
@@ -223,13 +224,18 @@ export default function MarketTable({ pair = 'IDR' }: MarketTableProps) {
                 onClick={() => router.push(`/coin/${coin.id}`)}
               >
                 <td className="px-4 py-2 text-white">{index + 1}</td>
-                <td className="px-4 py-2 flex items-center gap-2">
+                <td
+                  className={clsx(
+                    'px-4 py-2 flex items-center gap-2 bg-[#181818]',
+                    stickyLogo ? 'sticky left-0 z-10' : ''
+                  )}
+                >
                   <Image
                     src={coin.image}
                     alt={coin.name}
                     width={24}
                     height={24}
-                    className="rounded-full"
+                    className="rounded-full flex-shrink-0"
                   />
                   <div className="flex flex-col">
                     <span className="text-white">{coin.name}</span>

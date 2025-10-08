@@ -8,6 +8,8 @@ import NewsCarousel from "@/components/header/NewsCarousel"
 import Link from "next/link"
 import Attribution from "@/components/attribution/Attribution"
 import TypingText from "@/components/TypingText"
+import { motion } from "framer-motion"
+import { FaCubes, FaRobot, FaChartLine, FaLayerGroup, FaBook, FaUsers } from 'react-icons/fa'
 
 const PredictionChart = dynamic(() => import("@/components/charts/PredictionChart"), { ssr: false })
 const CoinChart = dynamic(() => import("@/components/charts/CoinChart"), { ssr: false })
@@ -18,7 +20,7 @@ export default function DashboardPage() {
   const aiRef = useRef<HTMLCanvasElement>(null)
   const tradeRef = useRef<HTMLCanvasElement>(null)
 
-  // AI Predictions animated background
+  // --- AI Predictions animated background ---
   useEffect(() => {
     const canvas = aiRef.current
     if (!canvas) return
@@ -34,13 +36,11 @@ export default function DashboardPage() {
       vx: (Math.random() - 0.5) * 0.7,
       vy: (Math.random() - 0.5) * 0.7,
       radius: Math.random() * 3 + 1,
-      color: `hsl(${280 + Math.random() * 40}, 70%, 60%)` // ungu ke biru muda
+      color: `hsl(${280 + Math.random() * 40}, 70%, 60%)`
     }))
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height)
-
-      // draw lines
       nodes.forEach((a, i) => {
         nodes.forEach((b, j) => {
           if (i !== j) {
@@ -58,8 +58,6 @@ export default function DashboardPage() {
           }
         })
       })
-
-      // draw nodes
       nodes.forEach(n => {
         ctx.beginPath()
         ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2)
@@ -70,11 +68,9 @@ export default function DashboardPage() {
         if (n.x < 0 || n.x > width) n.vx *= -1
         if (n.y < 0 || n.y > height) n.vy *= -1
       })
-
       requestAnimationFrame(animate)
     }
     animate()
-
     const handleResize = () => {
       width = canvas.width = canvas.parentElement!.clientWidth
       height = canvas.height = 200
@@ -83,7 +79,7 @@ export default function DashboardPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Trade Engine animated background
+  // --- Trade Engine animated background ---
   useEffect(() => {
     const canvas = tradeRef.current
     if (!canvas) return
@@ -123,7 +119,6 @@ export default function DashboardPage() {
       requestAnimationFrame(animate)
     }
     animate()
-
     const handleResize = () => {
       width = canvas.width = canvas.parentElement!.clientWidth
       height = canvas.height = 200
@@ -132,110 +127,164 @@ export default function DashboardPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const AboutSection = () => {
+    const features = [
+      { icon: <FaCubes className="w-8 h-8 text-[#603abd]" />, title: 'Modular & Extensible', desc: 'Modular and easily extensible architecture' },
+      { icon: <FaRobot className="w-8 h-8 text-[#603abd]" />, title: 'Auto Trading Engine', desc: 'Automatic trading engine for crypto and digital markets' },
+      { icon: <FaChartLine className="w-8 h-8 text-[#603abd]" />, title: 'AI Market Prediction', desc: 'Market prediction using artificial intelligence (AI Market Prediction)' },
+      { icon: <FaLayerGroup className="w-8 h-8 text-[#603abd]" />, title: 'Blockchain Integration', desc: 'Integration-ready with multiple blockchain platforms and APIs' },
+      { icon: <FaBook className="w-8 h-8 text-[#603abd]" />, title: 'Documentation', desc: 'Comprehensive documentation and practical examples' },
+      { icon: <FaUsers className="w-8 h-8 text-[#603abd]" />, title: 'Community Collaboration', desc: 'Open for community collaboration and contributions' },
+    ]
+    return (
+      <section className="py-16 bg-[#1a1a1a] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.h2
+            className="text-4xl font-bold mb-6 text-[#603abd]"
+            initial={{ opacity: 0, y: -30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            Tana Ecosystem
+          </motion.h2>
+          <motion.p
+            className="text-gray-300 mb-12 max-w-3xl mx-auto text-lg"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+          >
+            Tana Ecosystem is an open ecosystem for building modular, flexible, and easily integrated digital applications. 
+            This project focuses on developing solutions in the field of crypto and digital trading, including automatic trading engines, crypto asset management, integration with blockchain platforms, and market prediction powered by artificial intelligence (AI). Suitable for research, solution development, and real-world deployment — providing a solid technological foundation that can be expanded as needed.
+          </motion.p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, idx) => (
+              <motion.div
+                key={idx}
+                className="bg-[#202020] p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all cursor-pointer"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: idx * 0.15, duration: 0.6 }}
+              >
+                <div className="mb-4 flex justify-center border-2 border-[#603abd] p-4 rounded-xl hover:shadow-lg transition-all">{feature.icon}</div>
+                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const aiFeatures = [
+    { icon: <FaChartLine className="w-6 h-6 text-[#603abd]" />, text: "Market Forecasts" },
+    { icon: <FaRobot className="w-6 h-6 text-[#603abd]" />, text: "AI Analysis" },
+    { icon: <FaCubes className="w-6 h-6 text-[#603abd]" />, text: "Data Insights" },
+  ]
+  const tradeFeatures = [
+    { icon: <FaLayerGroup className="w-6 h-6 text-[#603abd]" />, text: "Auto Trading" },
+    { icon: <FaBook className="w-6 h-6 text-[#603abd]" />, text: "Strategy Backtest" },
+    { icon: <FaUsers className="w-6 h-6 text-[#603abd]" />, text: "Multi Wallet" },
+  ]
+
+  const renderFeatureIcons = (features: {icon: JSX.Element, text: string}[]) => (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2 text-center">
+      {features.map((f, idx) => (
+        <motion.div key={idx} className="flex flex-col items-center justify-center p-3 border-2 border-[#603abd] rounded-xl hover:shadow-lg transition-all"
+          initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx*0.1 }}>
+          {f.icon}
+          <span className="text-gray-300 text-sm mt-2">{f.text}</span>
+        </motion.div>
+      ))}
+    </div>
+  )
+
   return (
     <div className="space-y-4 bg-[#181818] text-white min-h-screen font-poppins">
-
-      {/* Typing Animation */}
       <TypingText />
+      <AboutSection />
 
-      {/* Trending Carousel */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 border-b border-[#222] pb-4">
         <TrendingCarousel />
       </div>
 
       {/* Market Section */}
-      <section className="border-b border-[#222] pb-4">
+      <section className="border-b border-[#222] pb-4 overflow-x-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <h2 className="text-xl font-normal mb-4 text-[#603abd]">Markets</h2>
-          <MarketTable pair="IDR" />
-          <div className="mt-4 text-sm text-gray-400">
-            Click a coin in the table to view its chart and predictions.
+          <div className="relative">
+            <MarketTable pair="IDR" stickyLogo />
           </div>
         </div>
       </section>
 
-      {/* Coin Chart Section */}
-      {selectedCoin && (
-        <section className="border-b border-[#222] pb-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-            <h2 className="text-xl font-normal mb-4 text-[#603abd]">
-              {selectedCoin.toUpperCase()} Price Chart
-            </h2>
-            <CoinChart coinId={selectedCoin} vsCurrency="idr" />
-          </div>
-        </section>
-      )}
-
-      {/* AI Prediction & Trade Engine */}
-      <section className="border-b border-[#222] pb-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 space-y-6">
+      {/* AI Predictions & Trade Engine */}
+      <section className="border-b border-[#222] pb-4 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
 
           {/* AI Predictions */}
-          <div className="relative bg-[#202020] p-4 rounded-lg shadow-md overflow-hidden">
+          <motion.div
+            className="relative bg-[#202020] p-4 rounded-lg shadow-md overflow-hidden"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          >
             <canvas ref={aiRef} className="absolute inset-0 w-full h-full z-0 opacity-40"></canvas>
             <div className="relative z-10">
-              <h2 className="text-xl font-normal mb-4 text-[#603abd]">AI Predictions</h2>
-              <p className="text-gray-300 text-sm mb-2">
-                AI Predictions utilize advanced machine learning algorithms to analyze historical and real-time market data, providing forecasts on potential price movements and market trends for selected cryptocurrencies.
-              </p>
-              <p className="text-gray-300 text-sm mb-4">
-                AI-powered insights to help you anticipate market movements.
-              </p>
-              {isAuthenticated ? (
-                selectedCoin ? (
-                  <PredictionChart coinId={selectedCoin} />
+              <h2 className="text-xl font-normal mb-2 text-[#603abd] text-center">AI Predictions</h2>
+              <p className="text-gray-300 text-sm mb-2 text-center">AI-powered insights to anticipate market movements.</p>
+              {renderFeatureIcons(aiFeatures)}
+              <div className="mt-4 text-center">
+                {isAuthenticated ? (
+                  selectedCoin ? (
+                    <PredictionChart coinId={selectedCoin} />
+                  ) : (
+                    <p className="text-gray-400">Please select a coin to see predictions.</p>
+                  )
                 ) : (
-                  <p className="text-gray-400">Please select a coin to see predictions.</p>
-                )
-              ) : (
-                <div className="text-center">
-                  <p className="text-gray-400 mb-4">
-                    Please log in to view detailed AI predictions.
-                  </p>
                   <Link
                     href="/auth/login"
-                    className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd]/10 transition-colors"
+                    className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd] hover:text-white transition-colors"
                   >
                     Log In
                   </Link>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Trade Engine */}
-          <div className="relative bg-[#202020] p-4 rounded-lg shadow-md overflow-hidden">
+          <motion.div
+            className="relative bg-[#202020] p-4 rounded-lg shadow-md overflow-hidden"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <canvas ref={tradeRef} className="absolute inset-0 w-full h-full z-0 opacity-40"></canvas>
             <div className="relative z-10">
-              <h2 className="text-xl font-normal mb-4 text-[#603abd]">Trade Engine</h2>
-              <p className="text-gray-300 text-sm mb-2">
-                The Trade Engine is an automated trading platform that allows users to simulate trading strategies, backtest them with historical data, and execute trades in real-time based on predefined rules and market conditions.
-              </p>
-              <p className="text-gray-300 text-sm mb-4">
-                Access our automated trade engine to simulate strategies and execute trades.
-              </p>
-              {isAuthenticated ? (
-                <Link
-                  href="/trade-engine"
-                  className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd]/10 transition-colors"
-                >
-                  Open Trade Engine
-                </Link>
-              ) : (
-                <div className="text-center">
-                  <p className="text-gray-400 mb-4">
-                    Please log in to access the Trade Engine.
-                  </p>
+              <h2 className="text-xl font-normal mb-2 text-[#603abd] text-center">Trade Engine</h2>
+              <p className="text-gray-300 text-sm mb-2 text-center">Simulate strategies and execute trades with our automated engine.</p>
+              {renderFeatureIcons(tradeFeatures)}
+              <div className="mt-4 text-center">
+                {isAuthenticated ? (
+                  <Link
+                    href="/trade-engine"
+                    className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd] hover:text-white transition-colors"
+                  >
+                    Open Trade Engine
+                  </Link>
+                ) : (
                   <Link
                     href="/auth/login"
-                    className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd]/10 transition-colors"
+                    className="border border-[#603abd] text-[#603abd] px-4 py-2 rounded-md hover:bg-[#603abd] hover:text-white transition-colors"
                   >
                     Log In
                   </Link>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </section>

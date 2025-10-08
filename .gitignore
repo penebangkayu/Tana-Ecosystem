@@ -21,6 +21,7 @@ MANIFEST
 # Virtual environments
 venv/
 .env
+.env.local
 .envrc
 .venv/
 env/
